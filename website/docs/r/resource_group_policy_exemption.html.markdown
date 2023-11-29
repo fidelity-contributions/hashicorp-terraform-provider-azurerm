@@ -65,7 +65,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The Policy Exemption id.
 
@@ -83,5 +83,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/l
 Policy Exemptions can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import azurerm_resource_group_policy_exemption.exemption1  /subscriptions/00000000-0000-0000-000000000000/resourceGroups/resGroup1/providers/Microsoft.Authorization/policyExemptions/exemption1
+terraform import azurerm_resource_group_policy_exemption.exemption1 /subscriptions/00000000-0000-0000-000000000000/resourceGroups/resGroup1/providers/Microsoft.Authorization/policyExemptions/exemption1
 ```

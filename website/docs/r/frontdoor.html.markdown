@@ -8,7 +8,7 @@ description: |-
 
 # azurerm_frontdoor
 
-!> **IMPORTANT** This resource deploys an Azure Front Door (classic) resource which is being deprecated in v4.0 of the AzureRM Provider. Please migrate your existing Azure Front Door (classic) deployments to the new [Front Door (standard/premium) resources](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cdn_frontdoor_custom_domain). The service team has [announced](https://azure.microsoft.com/blog/zero-downtime-migration-for-azure-front-door-now-in-preview/) the release of their `Front Door Classic` to `Front Door Standard/Premium` [migration tool](https://learn.microsoft.com/azure/frontdoor/tier-migration) to allow you to migrate your existing `Front Door Classic` instances to the new `Front Door Standard/Premium` product tiers.
+!> **IMPORTANT** This deploys an Azure Front Door (classic) resource which has been deprecated and will receive security updates only. Please migrate your existing Azure Front Door (classic) deployments to the new [Azure Front Door (standard/premium) resources](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cdn_frontdoor_custom_domain). For your convenience, the service team has exposed a `Front Door Classic` to `Front Door Standard/Premium` [migration tool](https://learn.microsoft.com/azure/frontdoor/tier-migration) to allow you to migrate your existing `Front Door Classic` instances to the new `Front Door Standard/Premium` product tiers.
 
 Manages an Azure Front Door (classic) instance.
 
@@ -127,7 +127,7 @@ The `backend` block supports the following:
 
 The `backend_pool` block supports the following:
 
-* `name` - (Required) Specifies the name of the Backend Pool. Changing this forces a new resource to be created.
+* `name` - (Required) Specifies the name of the Backend Pool.
 
 * `backend` - (Required) A `backend` block as defined below.
 
@@ -149,7 +149,7 @@ The `backend_pool_settings` block supports the following:
 
 The `frontend_endpoint` block supports the following:
 
-* `name` - (Required) Specifies the name of the `frontend_endpoint`. Changing this forces a new resource to be created.
+* `name` - (Required) Specifies the name of the `frontend_endpoint`.
 
 * `host_name` - (Required) Specifies the host name of the `frontend_endpoint`. Must be a domain name. In order to use a name.azurefd.net domain, the name value must match the Front Door name.
 
@@ -163,7 +163,7 @@ The `frontend_endpoint` block supports the following:
 
 The `backend_pool_health_probe` block supports the following:
 
-* `name` - (Required) Specifies the name of the Health Probe. Changing this forces a new resource to be created.
+* `name` - (Required) Specifies the name of the Health Probe.
 
 * `enabled` - (Optional) Is this health probe enabled? Defaults to `true`.
 
@@ -171,9 +171,9 @@ The `backend_pool_health_probe` block supports the following:
 
 * `protocol` - (Optional) Protocol scheme to use for the Health Probe. Possible values are `Http` and `Https`. Defaults to `Http`.
 
-* `probe_method` - (Optional) Specifies HTTP method the health probe uses when querying the backend pool instances. Possible values include: `Get` and `Head`. Defaults to `GET`.
+* `probe_method` - (Optional) Specifies HTTP method the health probe uses when querying the backend pool instances. Possible values include: `GET` and `HEAD`. Defaults to `GET`.
 
--> **NOTE:** Use the `Head` method if you do not need to check the response body of your health probe.
+-> **NOTE:** Use the `HEAD` method if you do not need to check the response body of your health probe.
 
 * `interval_in_seconds` - (Optional) The number of seconds between each Health Probe. Defaults to `120`.
 
@@ -181,7 +181,7 @@ The `backend_pool_health_probe` block supports the following:
 
 The `backend_pool_load_balancing` block supports the following:
 
-* `name` - (Required) Specifies the name of the Load Balancer. Changing this forces a new resource to be created.
+* `name` - (Required) Specifies the name of the Load Balancer.
 
 * `sample_size` - (Optional) The number of samples to consider for load balancing decisions. Defaults to `4`.
 
@@ -193,7 +193,7 @@ The `backend_pool_load_balancing` block supports the following:
 
 The `routing_rule` block supports the following:
 
-* `name` - (Required) Specifies the name of the Routing Rule. Changing this forces a new resource to be created.
+* `name` - (Required) Specifies the name of the Routing Rule.
 
 * `frontend_endpoints` - (Required) The names of the `frontend_endpoint` blocks within this resource to associate with this `routing_rule`.
 
@@ -205,7 +205,7 @@ The `routing_rule` block supports the following:
 
 * `forwarding_configuration` - (Optional) A `forwarding_configuration` block as defined below.
 
-* `redirect_configuration`   - (Optional) A `redirect_configuration` block as defined below.
+* `redirect_configuration` - (Optional) A `redirect_configuration` block as defined below.
 
 ---
 
@@ -221,7 +221,7 @@ The `forwarding_configuration` block supports the following:
 
 * `cache_query_parameters` - (Optional) Specify query parameters (array). Works only in combination with `cache_query_parameter_strip_directive` set to `StripAllExcept` or `StripOnly`.
 
-* `cache_duration` - (Optional) Specify the caching duration (in ISO8601 notation e.g. `P1DT2H` for 1 day and 2 hours). Needs to be greater than 0 and smaller than 365 days. `cache_duration` works only in combination with `cache_enabled` set to `true`.
+* `cache_duration` - (Optional) Specify the minimum caching duration (in ISO8601 notation e.g. `P1DT2H` for 1 day and 2 hours). Needs to be greater than 0 and smaller than 365 days. `cache_duration` works only in combination with `cache_enabled` set to `true`.
 
 * `custom_forwarding_path` - (Optional) Path to use when constructing the request to forward to the backend. This functions as a URL Rewrite. Default behaviour preserves the URL path.
 
@@ -231,7 +231,7 @@ The `forwarding_configuration` block supports the following:
 
 The `redirect_configuration` block supports the following:
 
-* `custom_host` - (Optional)  Set this to change the URL for the redirection.
+* `custom_host` - (Optional) Set this to change the URL for the redirection.
 
 * `redirect_protocol` - (Required) Protocol to use when redirecting. Valid options are `HttpOnly`, `HttpsOnly`, or `MatchRequest`.
 
@@ -293,7 +293,7 @@ The `redirect_configuration` block supports the following:
 
 ---
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `cname` - The host that each frontendEndpoint must CNAME to.
 
@@ -315,5 +315,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/l
 Front Doors can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import azurerm_frontdoor.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mygroup1/providers/Microsoft.Network/frontDoors/frontdoor1
+terraform import azurerm_frontdoor.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/frontDoors/frontdoor1
 ```

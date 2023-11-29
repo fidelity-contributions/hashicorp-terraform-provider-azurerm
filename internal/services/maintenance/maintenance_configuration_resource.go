@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package maintenance
 
 import (
@@ -6,16 +9,17 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 	"github.com/hashicorp/go-azure-helpers/lang/response"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonschema"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/location"
+	"github.com/hashicorp/go-azure-helpers/resourcemanager/tags"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/maintenance/2022-07-01-preview/maintenanceconfigurations"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/tf"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/maintenance/migration"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/maintenance/validate"
-	"github.com/hashicorp/terraform-provider-azurerm/internal/tags"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/validation"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/timeouts"
@@ -227,7 +231,7 @@ func resourceArmMaintenanceConfiguration() *pluginsdk.Resource {
 				},
 			},
 
-			"tags": tags.Schema(),
+			"tags": commonschema.Tags(),
 		},
 	}
 }
@@ -274,7 +278,7 @@ func resourceArmMaintenanceConfigurationCreateUpdate(d *pluginsdk.ResourceData, 
 	}
 
 	configuration := maintenanceconfigurations.MaintenanceConfiguration{
-		Name:     utils.String(id.ResourceName),
+		Name:     utils.String(id.MaintenanceConfigurationName),
 		Location: utils.String(location.Normalize(d.Get("location").(string))),
 		Properties: &maintenanceconfigurations.MaintenanceConfigurationProperties{
 			MaintenanceScope:    &scope,
@@ -284,7 +288,7 @@ func resourceArmMaintenanceConfigurationCreateUpdate(d *pluginsdk.ResourceData, 
 			ExtensionProperties: extensionProperties,
 			InstallPatches:      installPatches,
 		},
-		Tags: expandTags(d.Get("tags").(map[string]interface{})),
+		Tags: tags.Expand(d.Get("tags").(map[string]interface{})),
 	}
 
 	if _, err := client.CreateOrUpdate(ctx, id, configuration); err != nil {
@@ -315,13 +319,13 @@ func resourceArmMaintenanceConfigurationRead(d *pluginsdk.ResourceData, meta int
 		return fmt.Errorf("retrieving %s: %+v", id, err)
 	}
 
-	d.Set("name", id.ResourceName)
+	d.Set("name", id.MaintenanceConfigurationName)
 	d.Set("resource_group_name", id.ResourceGroupName)
 
 	if model := resp.Model; model != nil {
 		if props := model.Properties; props != nil {
-			d.Set("scope", props.MaintenanceScope)
-			d.Set("visibility", props.Visibility)
+			d.Set("scope", string(pointer.From(props.MaintenanceScope)))
+			d.Set("visibility", string(pointer.From(props.Visibility)))
 
 			properties := flattenExtensionProperties(props.ExtensionProperties)
 			if properties["InGuestPatchMode"] != nil {
@@ -341,7 +345,7 @@ func resourceArmMaintenanceConfigurationRead(d *pluginsdk.ResourceData, meta int
 			}
 		}
 		d.Set("location", location.NormalizeNilable(model.Location))
-		if err = tags.FlattenAndSet(d, flattenTags(model.Tags)); err != nil {
+		if err = tags.FlattenAndSet(d, model.Tags); err != nil {
 			return err
 		}
 	}
@@ -422,7 +426,10 @@ func expandMaintenanceConfigurationInstallPatches(input []interface{}) *maintena
 		return nil
 	}
 
-	v := input[0].(map[string]interface{})
+	v, ok := input[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	rebootSetting := maintenanceconfigurations.RebootOptions(v["reboot"].(string))
 	installPatches := maintenanceconfigurations.InputPatchConfiguration{
 		WindowsParameters: expandMaintenanceConfigurationInstallPatchesWindows(v["windows"].([]interface{})),
@@ -461,7 +468,10 @@ func expandMaintenanceConfigurationInstallPatchesWindows(input []interface{}) *m
 		return nil
 	}
 
-	v := input[0].(map[string]interface{})
+	v, ok := input[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	windowsInput := maintenanceconfigurations.InputWindowsParameters{}
 	if v, ok := v["classifications_to_include"]; ok {
 		windowsInput.ClassificationsToInclude = utils.ExpandStringSlice(v.([]interface{}))
@@ -504,15 +514,18 @@ func expandMaintenanceConfigurationInstallPatchesLinux(input []interface{}) *mai
 		return nil
 	}
 
-	v := input[0].(map[string]interface{})
+	v, ok := input[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	linuxParameters := maintenanceconfigurations.InputLinuxParameters{}
 	if v, ok := v["classifications_to_include"]; ok {
 		linuxParameters.ClassificationsToInclude = utils.ExpandStringSlice(v.([]interface{}))
 	}
-	if v, ok := v["packages_to_exclude"]; ok {
+	if v, ok := v["package_names_mask_to_exclude"]; ok {
 		linuxParameters.PackageNameMasksToExclude = utils.ExpandStringSlice(v.([]interface{}))
 	}
-	if v, ok := v["packages_to_include"]; ok {
+	if v, ok := v["package_names_mask_to_include"]; ok {
 		linuxParameters.PackageNameMasksToInclude = utils.ExpandStringSlice(v.([]interface{}))
 	}
 	return &linuxParameters
@@ -521,22 +534,25 @@ func expandMaintenanceConfigurationInstallPatchesLinux(input []interface{}) *mai
 func flattenMaintenanceConfigurationInstallPatchesLinux(input *maintenanceconfigurations.InputLinuxParameters) []interface{} {
 	results := make([]interface{}, 0)
 
-	if v := input; v != nil {
-		output := make(map[string]interface{})
-
-		if classificationsToInclude := v.ClassificationsToInclude; classificationsToInclude != nil {
-			output["classifications_to_include"] = utils.FlattenStringSlice(classificationsToInclude)
+	if input != nil {
+		classificationsToInclude := make([]interface{}, 0)
+		if input.ClassificationsToInclude != nil {
+			classificationsToInclude = utils.FlattenStringSlice(input.ClassificationsToInclude)
+		}
+		packageNamesMaskToExclude := make([]interface{}, 0)
+		if input.PackageNameMasksToExclude != nil {
+			packageNamesMaskToExclude = utils.FlattenStringSlice(input.PackageNameMasksToExclude)
+		}
+		packageNamesMaskToInclude := make([]interface{}, 0)
+		if input.PackageNameMasksToInclude != nil {
+			packageNamesMaskToInclude = utils.FlattenStringSlice(input.PackageNameMasksToInclude)
 		}
 
-		if packageNameMasksToInclude := v.PackageNameMasksToInclude; packageNameMasksToInclude != nil {
-			output["packages_to_exclude"] = utils.FlattenStringSlice(packageNameMasksToInclude)
-		}
-
-		if packageNameMasksToExclude := v.PackageNameMasksToExclude; packageNameMasksToExclude != nil {
-			output["packages_to_include"] = utils.FlattenStringSlice(packageNameMasksToExclude)
-		}
-
-		results = append(results, output)
+		results = append(results, map[string]interface{}{
+			"classifications_to_include":    classificationsToInclude,
+			"package_names_mask_to_exclude": packageNamesMaskToExclude,
+			"package_names_mask_to_include": packageNamesMaskToInclude,
+		})
 	}
 
 	return results

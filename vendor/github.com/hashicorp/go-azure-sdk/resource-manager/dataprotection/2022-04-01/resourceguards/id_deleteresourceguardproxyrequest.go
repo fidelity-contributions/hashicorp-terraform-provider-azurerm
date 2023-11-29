@@ -7,23 +7,26 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = DeleteResourceGuardProxyRequestId{}
 
 // DeleteResourceGuardProxyRequestId is a struct representing the Resource ID for a Delete Resource Guard Proxy Request
 type DeleteResourceGuardProxyRequestId struct {
-	SubscriptionId     string
-	ResourceGroupName  string
-	ResourceGuardsName string
-	RequestName        string
+	SubscriptionId                      string
+	ResourceGroupName                   string
+	ResourceGuardName                   string
+	DeleteResourceGuardProxyRequestName string
 }
 
 // NewDeleteResourceGuardProxyRequestID returns a new DeleteResourceGuardProxyRequestId struct
-func NewDeleteResourceGuardProxyRequestID(subscriptionId string, resourceGroupName string, resourceGuardsName string, requestName string) DeleteResourceGuardProxyRequestId {
+func NewDeleteResourceGuardProxyRequestID(subscriptionId string, resourceGroupName string, resourceGuardName string, deleteResourceGuardProxyRequestName string) DeleteResourceGuardProxyRequestId {
 	return DeleteResourceGuardProxyRequestId{
-		SubscriptionId:     subscriptionId,
-		ResourceGroupName:  resourceGroupName,
-		ResourceGuardsName: resourceGuardsName,
-		RequestName:        requestName,
+		SubscriptionId:                      subscriptionId,
+		ResourceGroupName:                   resourceGroupName,
+		ResourceGuardName:                   resourceGuardName,
+		DeleteResourceGuardProxyRequestName: deleteResourceGuardProxyRequestName,
 	}
 }
 
@@ -35,23 +38,9 @@ func ParseDeleteResourceGuardProxyRequestID(input string) (*DeleteResourceGuardP
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := DeleteResourceGuardProxyRequestId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGuardsName, ok = parsed.Parsed["resourceGuardsName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGuardsName' was not found in the resource id %q", input)
-	}
-
-	if id.RequestName, ok = parsed.Parsed["requestName"]; !ok {
-		return nil, fmt.Errorf("the segment 'requestName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -66,26 +55,34 @@ func ParseDeleteResourceGuardProxyRequestIDInsensitively(input string) (*DeleteR
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := DeleteResourceGuardProxyRequestId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGuardsName, ok = parsed.Parsed["resourceGuardsName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGuardsName' was not found in the resource id %q", input)
-	}
-
-	if id.RequestName, ok = parsed.Parsed["requestName"]; !ok {
-		return nil, fmt.Errorf("the segment 'requestName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *DeleteResourceGuardProxyRequestId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.ResourceGroupName, ok = input.Parsed["resourceGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroupName", input)
+	}
+
+	if id.ResourceGuardName, ok = input.Parsed["resourceGuardName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGuardName", input)
+	}
+
+	if id.DeleteResourceGuardProxyRequestName, ok = input.Parsed["deleteResourceGuardProxyRequestName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "deleteResourceGuardProxyRequestName", input)
+	}
+
+	return nil
 }
 
 // ValidateDeleteResourceGuardProxyRequestID checks that 'input' can be parsed as a Delete Resource Guard Proxy Request ID
@@ -106,7 +103,7 @@ func ValidateDeleteResourceGuardProxyRequestID(input interface{}, key string) (w
 // ID returns the formatted Delete Resource Guard Proxy Request ID
 func (id DeleteResourceGuardProxyRequestId) ID() string {
 	fmtString := "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.DataProtection/resourceGuards/%s/deleteResourceGuardProxyRequests/%s"
-	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.ResourceGuardsName, id.RequestName)
+	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.ResourceGuardName, id.DeleteResourceGuardProxyRequestName)
 }
 
 // Segments returns a slice of Resource ID Segments which comprise this Delete Resource Guard Proxy Request ID
@@ -119,9 +116,9 @@ func (id DeleteResourceGuardProxyRequestId) Segments() []resourceids.Segment {
 		resourceids.StaticSegment("staticProviders", "providers", "providers"),
 		resourceids.ResourceProviderSegment("staticMicrosoftDataProtection", "Microsoft.DataProtection", "Microsoft.DataProtection"),
 		resourceids.StaticSegment("staticResourceGuards", "resourceGuards", "resourceGuards"),
-		resourceids.UserSpecifiedSegment("resourceGuardsName", "resourceGuardsValue"),
+		resourceids.UserSpecifiedSegment("resourceGuardName", "resourceGuardValue"),
 		resourceids.StaticSegment("staticDeleteResourceGuardProxyRequests", "deleteResourceGuardProxyRequests", "deleteResourceGuardProxyRequests"),
-		resourceids.UserSpecifiedSegment("requestName", "requestValue"),
+		resourceids.UserSpecifiedSegment("deleteResourceGuardProxyRequestName", "deleteResourceGuardProxyRequestValue"),
 	}
 }
 
@@ -130,8 +127,8 @@ func (id DeleteResourceGuardProxyRequestId) String() string {
 	components := []string{
 		fmt.Sprintf("Subscription: %q", id.SubscriptionId),
 		fmt.Sprintf("Resource Group Name: %q", id.ResourceGroupName),
-		fmt.Sprintf("Resource Guards Name: %q", id.ResourceGuardsName),
-		fmt.Sprintf("Request Name: %q", id.RequestName),
+		fmt.Sprintf("Resource Guard Name: %q", id.ResourceGuardName),
+		fmt.Sprintf("Delete Resource Guard Proxy Request Name: %q", id.DeleteResourceGuardProxyRequestName),
 	}
 	return fmt.Sprintf("Delete Resource Guard Proxy Request (%s)", strings.Join(components, "\n"))
 }

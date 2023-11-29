@@ -89,7 +89,7 @@ The following arguments are supported:
 
 * `database_name` - (Required) The name of the database which you would like to attach, use * if you want to follow all current and future databases. Changing this forces a new resource to be created.
 
-* `default_principal_modification_kind` - (Optional) The default principals modification kind. Valid values are: `None` (default), `Replace` and `Union`.
+* `default_principal_modification_kind` - (Optional) The default principals modification kind. Valid values are: `None` (default), `Replace` and `Union`. Defaults to `None`.
 
 * `sharing` - (Optional) A `sharing` block as defined below.
 
@@ -111,7 +111,7 @@ An `sharing` block exports the following:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The Kusto Attached Database Configuration ID.
 

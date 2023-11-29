@@ -7,6 +7,9 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = ScopedBudgetId{}
 
 // ScopedBudgetId is a struct representing the Resource ID for a Scoped Budget
@@ -31,15 +34,9 @@ func ParseScopedBudgetID(input string) (*ScopedBudgetId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := ScopedBudgetId{}
-
-	if id.Scope, ok = parsed.Parsed["scope"]; !ok {
-		return nil, fmt.Errorf("the segment 'scope' was not found in the resource id %q", input)
-	}
-
-	if id.BudgetName, ok = parsed.Parsed["budgetName"]; !ok {
-		return nil, fmt.Errorf("the segment 'budgetName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -54,18 +51,26 @@ func ParseScopedBudgetIDInsensitively(input string) (*ScopedBudgetId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := ScopedBudgetId{}
-
-	if id.Scope, ok = parsed.Parsed["scope"]; !ok {
-		return nil, fmt.Errorf("the segment 'scope' was not found in the resource id %q", input)
-	}
-
-	if id.BudgetName, ok = parsed.Parsed["budgetName"]; !ok {
-		return nil, fmt.Errorf("the segment 'budgetName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *ScopedBudgetId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.Scope, ok = input.Parsed["scope"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "scope", input)
+	}
+
+	if id.BudgetName, ok = input.Parsed["budgetName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "budgetName", input)
+	}
+
+	return nil
 }
 
 // ValidateScopedBudgetID checks that 'input' can be parsed as a Scoped Budget ID

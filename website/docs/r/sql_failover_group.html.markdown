@@ -75,11 +75,11 @@ The following arguments are supported:
 
 -> **NOTE:** The failover group will create a secondary database for each database listed in `databases`. If the secondary databases need to be managed through Terraform, they should be defined as resources and a dependency added to the failover group to ensure the secondary databases are created first. Please refer to the detailed example which can be found in [the `./examples/sql-azure/failover_group` directory within the GitHub Repository](https://github.com/hashicorp/terraform-provider-azurerm/tree/main/examples/sql-azure/failover_group)
 
-* `partner_servers` - (Required) A list of secondary servers as documented below
+* `partner_servers` - (Required) A list of `partner_servers` blocks as documented below.
 
-* `read_write_endpoint_failover_policy` - (Required) A read/write policy as documented below
+* `read_write_endpoint_failover_policy` - (Required) A `read_write_endpoint_failover_policy` block as documented below.
 
-* `readonly_endpoint_failover_policy` - (Optional) a read-only policy as documented below
+* `readonly_endpoint_failover_policy` - (Optional) A `readonly_endpoint_failover_policy` block as documented below.
 
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 
@@ -105,11 +105,11 @@ The `readonly_endpoint_failover_policy` block supports the following:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The failover group ID.
 * `location` - the location of the failover group.
-* `server_name` - (Required) the name of the primary SQL Database Server.
+* `server_name` - (Required) the name of the primary SQL Database Server. Changing this forces a new resource to be created.
 * `role` - local replication role of the failover group instance.
 * `databases` - (Optional) list of databases in the failover group.
 * `partner_servers` - (Required) list of partner server information for the failover group.
@@ -128,5 +128,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/l
 SQL Failover Groups can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import azurerm_sql_failover_group.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myresourcegroup/providers/Microsoft.Sql/servers/myserver/failovergroups/group1
+terraform import azurerm_sql_failover_group.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myresourcegroup/providers/Microsoft.Sql/servers/myserver/failoverGroups/group1
 ```

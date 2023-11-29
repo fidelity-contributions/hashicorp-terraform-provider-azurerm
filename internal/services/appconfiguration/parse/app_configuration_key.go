@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package parse
 
 import (
@@ -44,10 +47,10 @@ func KeyId(input string) (*AppConfigurationKeyId, error) {
 		Label: label,
 	}
 
-	// Label will have a "%00" placeholder if we're dealing with an empty label,
-	// so we set the label to the expected value (empty string) and trim the input
-	// string, so we can properly extract the configuration store ID out of it.
-	if label == "%00" {
+	// Golang's URL parser will translate %00 to \000 (NUL). This will only happen if we're dealing with an empty
+	// label, so we set the label to the expected value (empty string) and trim the input string, so we can properly
+	// extract the configuration store ID out of it.
+	if label == "\000" {
 		appcfgID.Label = ""
 		input = strings.TrimSuffix(input, "%00")
 	}
@@ -58,7 +61,7 @@ func KeyId(input string) (*AppConfigurationKeyId, error) {
 
 // a workaround to support "/" in id
 func handleSlashInIdForKey(input string) string {
-	oldNames := regexp.MustCompile(`AppConfigurationKey\/(.+)\/Label`).FindStringSubmatch(input)
+	oldNames := regexp.MustCompile(`AppConfigurationKey\/(.+)\/Label\/`).FindStringSubmatch(input)
 	if len(oldNames) == 2 {
 		input = strings.Replace(input, oldNames[1], url.QueryEscape(oldNames[1]), 1)
 	}

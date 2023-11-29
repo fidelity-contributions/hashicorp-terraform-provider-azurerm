@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package disks
 
 import (
@@ -7,17 +10,16 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-azure-helpers/lang/response"
+	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonids"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonschema"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/location"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/tags"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/zones"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/storagepool/2021-08-01/diskpools"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/locks"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/sdk"
 	disksValidate "github.com/hashicorp/terraform-provider-azurerm/internal/services/disks/validate"
-	networkValidate "github.com/hashicorp/terraform-provider-azurerm/internal/services/network/validate"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 )
 
@@ -64,7 +66,7 @@ func (DiskPoolResource) Arguments() map[string]*schema.Schema {
 			Type:         pluginsdk.TypeString,
 			Required:     true,
 			ForceNew:     true,
-			ValidateFunc: networkValidate.SubnetID,
+			ValidateFunc: commonids.ValidateSubnetID,
 		},
 
 		"tags": commonschema.Tags(),
@@ -126,8 +128,8 @@ func (r DiskPoolResource) Create() sdk.ResourceFunc {
 			}
 
 			//lintignore:R006
-			return pluginsdk.Retry(time.Until(deadline), func() *resource.RetryError {
-				if err := r.retryError("waiting for creation", id.ID(), future.Poller.PollUntilDone()); err != nil {
+			return pluginsdk.Retry(time.Until(deadline), func() *pluginsdk.RetryError {
+				if err := r.retryError("waiting for creation", id.ID(), future.Poller.PollUntilDone(ctx)); err != nil {
 					return err
 				}
 				metadata.SetID(id)
@@ -198,8 +200,8 @@ func (r DiskPoolResource) Delete() sdk.ResourceFunc {
 			}
 
 			//lintignore:R006
-			return pluginsdk.Retry(time.Until(deadline), func() *resource.RetryError {
-				return r.retryError("waiting for deletion", id.ID(), future.Poller.PollUntilDone())
+			return pluginsdk.Retry(time.Until(deadline), func() *pluginsdk.RetryError {
+				return r.retryError("waiting for deletion", id.ID(), future.Poller.PollUntilDone(ctx))
 			})
 		},
 	}
@@ -247,14 +249,14 @@ func (r DiskPoolResource) Update() sdk.ResourceFunc {
 			}
 
 			//lintignore:R006
-			return pluginsdk.Retry(time.Until(deadline), func() *resource.RetryError {
-				return r.retryError("waiting for update", id.ID(), future.Poller.PollUntilDone())
+			return pluginsdk.Retry(time.Until(deadline), func() *pluginsdk.RetryError {
+				return r.retryError("waiting for update", id.ID(), future.Poller.PollUntilDone(ctx))
 			})
 		},
 	}
 }
 
-func (DiskPoolResource) retryError(action string, id string, err error) *resource.RetryError {
+func (DiskPoolResource) retryError(action string, id string, err error) *pluginsdk.RetryError {
 	if err == nil {
 		return nil
 	}

@@ -46,6 +46,8 @@ The following attributes are exported:
 
 * `agent_pool_profile` - An `agent_pool_profile` block as documented below.
 
+* `current_kubernetes_version` - Contains the current version of Kubernetes running on the Cluster.
+
 * `dns_prefix` - The DNS Prefix of the managed Kubernetes cluster.
 
 * `fqdn` - The FQDN of the Azure Kubernetes Managed Cluster.
@@ -55,6 +57,8 @@ The following attributes are exported:
 * `http_application_routing_zone_name` - The Zone Name of the HTTP Application Routing.
 
 * `ingress_application_gateway` - An `ingress_application_gateway` block as documented below.
+
+* `key_management_service` - A `key_management_service` block as documented below.
 
 * `key_vault_secrets_provider` - A `key_vault_secrets_provider` block as documented below.
 
@@ -96,6 +100,8 @@ The following attributes are exported:
 
 * `node_resource_group` - Auto-generated Resource Group containing AKS Cluster resources.
 
+* `node_resource_group_id` - The ID of the Resource Group containing the resources for this Managed Kubernetes Cluster.
+
 * `role_based_access_control_enabled` - Is Role Based Access Control enabled for this managed Kubernetes Cluster?
 
 * `service_principal` - A `service_principal` block as documented below.
@@ -107,6 +113,8 @@ The following attributes are exported:
 * `kubelet_identity` - A `kubelet_identity` block as documented below.
 
 * `tags` - A mapping of tags assigned to this resource.
+
+* `custom_ca_trust_certificates_base64` - A list of custom base64 encoded CAs used by this Managed Kubernetes Cluster.
 
 ---
 
@@ -175,6 +183,14 @@ An `azure_active_directory_role_based_access_control` block exports the followin
 A `upgrade_settings` block exports the following:
 
 * `max_surge` - The maximum number or percentage of nodes that will be added to the Node Pool size during an upgrade.
+
+---
+
+A `key_management_service` block supports the following:
+
+* `key_vault_key_id` - Identifier of Azure Key Vault key. See [key identifier format](https://learn.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name) for more details.
+
+* `key_vault_network_access` - Network access of the key vault. The possible values are `Public` and `Private`. `Public` means the key vault allows public access from all networks. `Private` means the key vault disables public access and enables private link.
 
 ---
 
@@ -258,6 +274,8 @@ A `network_profile` block exports the following:
 An `oms_agent` block exports the following:
 
 * `log_analytics_workspace_id` - The ID of the Log Analytics Workspace to which the OMS Agent should send data.
+
+* `msi_auth_for_monitoring_enabled` - Is managed identity authentication for monitoring enabled?
 
 * `oms_agent_identity` - An `oms_agent_identity` block as defined below.  
 
@@ -354,6 +372,20 @@ The `kubelet_identity` block exports the following:
 A `ssh_key` block exports the following:
 
 * `key_data` - The Public SSH Key used to access the cluster.
+
+---
+
+A `service_mesh_profile` block exports the following:
+
+* `mode` - The mode of the service mesh.
+
+* `internal_ingress_gateway_enabled` - Is Istio Internal Ingress Gateway enabled?
+
+* `external_ingress_gateway_enabled` - Is Istio External Ingress Gateway enabled?
+
+-> **Note:** This requires that the Preview Feature `Microsoft.ContainerService/AzureServiceMeshPreview` is enabled and the Resource Provider is re-registered, see [the documentation](https://learn.microsoft.com/en-us/azure/aks/istio-deploy-addon#register-the-azureservicemeshpreview-feature-flag) for more information.
+
+---
 
 ## Timeouts
 

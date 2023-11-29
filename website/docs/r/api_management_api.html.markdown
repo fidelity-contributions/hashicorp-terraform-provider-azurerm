@@ -166,7 +166,7 @@ A `wsdl_selector` block supports the following:
 
 ## Attributes Reference
 
-In addition to all arguments above, the following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the API Management API.
 
@@ -174,9 +174,9 @@ In addition to all arguments above, the following attributes are exported:
 
 * `is_online` - Is this API Revision online/accessible via the Gateway?
 
-* `version` - (Optional) The Version number of this API, if this API is versioned.
+* `version` - The Version number of this API, if this API is versioned.
 
-* `version_set_id` - (Optional) The ID of the Version Set which this API is associated with.
+* `version_set_id` - The ID of the Version Set which this API is associated with.
 
 ## Timeouts
 

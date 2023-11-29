@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package labservice
 
 import (
@@ -24,6 +27,8 @@ func (r Registration) Resources() []sdk.Resource {
 	return []sdk.Resource{
 		LabServiceLabResource{},
 		LabServicePlanResource{},
+		LabServiceScheduleResource{},
+		LabServiceUserResource{},
 	}
 }
 

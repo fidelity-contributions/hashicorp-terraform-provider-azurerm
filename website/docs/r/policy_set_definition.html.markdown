@@ -60,7 +60,7 @@ The following arguments are supported:
 
 * `description` - (Optional) The description of the policy set definition.
 
-* `management_group_id` -  (Optional) The id of the Management Group where this policy set definition should be defined. Changing this forces a new resource to be created.
+* `management_group_id` - (Optional) The id of the Management Group where this policy set definition should be defined. Changing this forces a new resource to be created.
 
 * `metadata` - (Optional) The metadata for the policy set definition. This is a JSON object representing additional metadata that should be stored with the policy definition.
 
@@ -94,7 +94,7 @@ An `policy_definition_group` block supports the following:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Policy Set Definition.
 

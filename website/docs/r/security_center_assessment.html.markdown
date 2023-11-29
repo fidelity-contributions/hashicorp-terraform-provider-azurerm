@@ -47,8 +47,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "example" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "16.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
   }
 
@@ -127,5 +127,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/l
 Security Assessment can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import azurerm_security_center_assessment.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/resGroup1/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/providers/Microsoft.Security/assessments/00000000-0000-0000-0000-000000000000
+terraform import azurerm_security_center_assessment.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resGroup1/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1/providers/Microsoft.Security/assessments/00000000-0000-0000-0000-000000000000
 ```

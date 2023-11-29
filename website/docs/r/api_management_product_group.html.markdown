@@ -52,7 +52,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-In addition to all arguments above, the following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the API Management Product Group.
 
@@ -61,7 +61,6 @@ In addition to all arguments above, the following attributes are exported:
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/language/resources/syntax#operation-timeouts) for certain actions:
 
 * `create` - (Defaults to 30 minutes) Used when creating the API Management Product Group.
-* `update` - (Defaults to 30 minutes) Used when updating the API Management Product Group.
 * `read` - (Defaults to 5 minutes) Used when retrieving the API Management Product Group.
 * `delete` - (Defaults to 30 minutes) Used when deleting the API Management Product Group.
 

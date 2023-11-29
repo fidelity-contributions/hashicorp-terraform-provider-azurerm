@@ -1,17 +1,24 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package client
 
 import (
+	"fmt"
+
+	network_2023_06_01 "github.com/hashicorp/go-azure-sdk/resource-manager/network/2023-06-01"
+	"github.com/hashicorp/go-azure-sdk/sdk/client/resourcemanager"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/common"
-	"github.com/tombuildsstuff/kermit/sdk/network/2022-05-01/network"
+	"github.com/tombuildsstuff/kermit/sdk/network/2022-07-01/network"
 )
 
 type Client struct {
+	*network_2023_06_01.Client
+
+	// Usages of the clients below use `Azure/azure-sdk-for-go` and should be updated
+	// to use `hashicorp/go-azure-sdk` (available above).
 	ApplicationGatewaysClient              *network.ApplicationGatewaysClient
-	ApplicationSecurityGroupsClient        *network.ApplicationSecurityGroupsClient
-	BastionHostsClient                     *network.BastionHostsClient
-	ConfigurationPolicyGroupClient         *network.ConfigurationPolicyGroupsClient
-	ConnectionMonitorsClient               *network.ConnectionMonitorsClient
-	DDOSProtectionPlansClient              *network.DdosProtectionPlansClient
+	CustomIPPrefixesClient                 *network.CustomIPPrefixesClient
 	ExpressRouteAuthsClient                *network.ExpressRouteCircuitAuthorizationsClient
 	ExpressRouteCircuitsClient             *network.ExpressRouteCircuitsClient
 	ExpressRouteCircuitConnectionClient    *network.ExpressRouteCircuitConnectionsClient
@@ -19,32 +26,25 @@ type Client struct {
 	ExpressRouteGatewaysClient             *network.ExpressRouteGatewaysClient
 	ExpressRoutePeeringsClient             *network.ExpressRouteCircuitPeeringsClient
 	ExpressRoutePortsClient                *network.ExpressRoutePortsClient
-	FlowLogsClient                         *network.FlowLogsClient
+	ExpressRoutePortAuthorizationsClient   *network.ExpressRoutePortAuthorizationsClient
 	HubRouteTableClient                    *network.HubRouteTablesClient
 	HubVirtualNetworkConnectionClient      *network.HubVirtualNetworkConnectionsClient
 	InterfacesClient                       *network.InterfacesClient
 	IPGroupsClient                         *network.IPGroupsClient
 	LocalNetworkGatewaysClient             *network.LocalNetworkGatewaysClient
-	ManagersClient                         *network.ManagersClient
-	ManagerNetworkGroupsClient             *network.GroupsClient
-	ManagerSubscriptionConnectionsClient   *network.SubscriptionNetworkManagerConnectionsClient
 	NatRuleClient                          *network.NatRulesClient
 	PointToSiteVpnGatewaysClient           *network.P2sVpnGatewaysClient
-	ProfileClient                          *network.ProfilesClient
-	PacketCapturesClient                   *network.PacketCapturesClient
-	PrivateEndpointClient                  *network.PrivateEndpointsClient
 	PublicIPsClient                        *network.PublicIPAddressesClient
 	PublicIPPrefixesClient                 *network.PublicIPPrefixesClient
+	PrivateDnsZoneGroupClient              *network.PrivateDNSZoneGroupsClient
+	PrivateLinkServiceClient               *network.PrivateLinkServicesClient
+	ResourceNavigationLinkClient           *network.ResourceNavigationLinksClient
 	RouteMapsClient                        *network.RouteMapsClient
-	RoutesClient                           *network.RoutesClient
-	RouteFiltersClient                     *network.RouteFiltersClient
-	RouteTablesClient                      *network.RouteTablesClient
 	SecurityGroupClient                    *network.SecurityGroupsClient
 	SecurityPartnerProviderClient          *network.SecurityPartnerProvidersClient
-	SecurityRuleClient                     *network.SecurityRulesClient
+	ServiceAssociationLinkClient           *network.ServiceAssociationLinksClient
 	ServiceEndpointPoliciesClient          *network.ServiceEndpointPoliciesClient
 	ServiceEndpointPolicyDefinitionsClient *network.ServiceEndpointPolicyDefinitionsClient
-	ServiceTagsClient                      *network.ServiceTagsClient
 	SubnetsClient                          *network.SubnetsClient
 	NatGatewayClient                       *network.NatGatewaysClient
 	VirtualHubBgpConnectionClient          *network.VirtualHubBgpConnectionClient
@@ -56,36 +56,14 @@ type Client struct {
 	VnetPeeringsClient                     *network.VirtualNetworkPeeringsClient
 	VirtualWanClient                       *network.VirtualWansClient
 	VirtualHubClient                       *network.VirtualHubsClient
-	VpnConnectionsClient                   *network.VpnConnectionsClient
-	VpnGatewaysClient                      *network.VpnGatewaysClient
-	VpnServerConfigurationsClient          *network.VpnServerConfigurationsClient
-	VpnSitesClient                         *network.VpnSitesClient
-	WatcherClient                          *network.WatchersClient
-	WebApplicationFirewallPoliciesClient   *network.WebApplicationFirewallPoliciesClient
-	PrivateDnsZoneGroupClient              *network.PrivateDNSZoneGroupsClient
-	PrivateLinkServiceClient               *network.PrivateLinkServicesClient
-	ServiceAssociationLinkClient           *network.ServiceAssociationLinksClient
-	ResourceNavigationLinkClient           *network.ResourceNavigationLinksClient
 }
 
-func NewClient(o *common.ClientOptions) *Client {
+func NewClient(o *common.ClientOptions) (*Client, error) {
 	ApplicationGatewaysClient := network.NewApplicationGatewaysClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&ApplicationGatewaysClient.Client, o.ResourceManagerAuthorizer)
 
-	ApplicationSecurityGroupsClient := network.NewApplicationSecurityGroupsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&ApplicationSecurityGroupsClient.Client, o.ResourceManagerAuthorizer)
-
-	BastionHostsClient := network.NewBastionHostsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&BastionHostsClient.Client, o.ResourceManagerAuthorizer)
-
-	configurationPolicyGroupClient := network.NewConfigurationPolicyGroupsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&configurationPolicyGroupClient.Client, o.ResourceManagerAuthorizer)
-
-	ConnectionMonitorsClient := network.NewConnectionMonitorsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&ConnectionMonitorsClient.Client, o.ResourceManagerAuthorizer)
-
-	DDOSProtectionPlansClient := network.NewDdosProtectionPlansClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&DDOSProtectionPlansClient.Client, o.ResourceManagerAuthorizer)
+	customIpPrefixesClient := network.NewCustomIPPrefixesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
+	o.ConfigureClient(&customIpPrefixesClient.Client, o.ResourceManagerAuthorizer)
 
 	ExpressRouteAuthsClient := network.NewExpressRouteCircuitAuthorizationsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&ExpressRouteAuthsClient.Client, o.ResourceManagerAuthorizer)
@@ -108,8 +86,8 @@ func NewClient(o *common.ClientOptions) *Client {
 	ExpressRoutePortsClient := network.NewExpressRoutePortsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&ExpressRoutePortsClient.Client, o.ResourceManagerAuthorizer)
 
-	FlowLogsClient := network.NewFlowLogsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&FlowLogsClient.Client, o.ResourceManagerAuthorizer)
+	ExpressRoutePortAuthorizationsClient := network.NewExpressRoutePortAuthorizationsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
+	o.ConfigureClient(&ExpressRoutePortAuthorizationsClient.Client, o.ResourceManagerAuthorizer)
 
 	HubRouteTableClient := network.NewHubRouteTablesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&HubRouteTableClient.Client, o.ResourceManagerAuthorizer)
@@ -126,35 +104,14 @@ func NewClient(o *common.ClientOptions) *Client {
 	LocalNetworkGatewaysClient := network.NewLocalNetworkGatewaysClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&LocalNetworkGatewaysClient.Client, o.ResourceManagerAuthorizer)
 
-	ManagersClient := network.NewManagersClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&ManagersClient.Client, o.ResourceManagerAuthorizer)
-
-	ManagerNetworkGroupsClient := network.NewGroupsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&ManagerNetworkGroupsClient.Client, o.ResourceManagerAuthorizer)
-
-	ManagerSubscriptionConnectionsClient := network.NewSubscriptionNetworkManagerConnectionsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&ManagerSubscriptionConnectionsClient.Client, o.ResourceManagerAuthorizer)
-
 	NatRuleClient := network.NewNatRulesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&NatRuleClient.Client, o.ResourceManagerAuthorizer)
 
 	pointToSiteVpnGatewaysClient := network.NewP2sVpnGatewaysClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&pointToSiteVpnGatewaysClient.Client, o.ResourceManagerAuthorizer)
 
-	vpnServerConfigurationsClient := network.NewVpnServerConfigurationsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&vpnServerConfigurationsClient.Client, o.ResourceManagerAuthorizer)
-
-	ProfileClient := network.NewProfilesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&ProfileClient.Client, o.ResourceManagerAuthorizer)
-
 	VnetClient := network.NewVirtualNetworksClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&VnetClient.Client, o.ResourceManagerAuthorizer)
-
-	PacketCapturesClient := network.NewPacketCapturesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&PacketCapturesClient.Client, o.ResourceManagerAuthorizer)
-
-	PrivateEndpointClient := network.NewPrivateEndpointsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&PrivateEndpointClient.Client, o.ResourceManagerAuthorizer)
 
 	VnetPeeringsClient := network.NewVirtualNetworkPeeringsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&VnetPeeringsClient.Client, o.ResourceManagerAuthorizer)
@@ -174,32 +131,17 @@ func NewClient(o *common.ClientOptions) *Client {
 	RouteMapsClient := network.NewRouteMapsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&RouteMapsClient.Client, o.ResourceManagerAuthorizer)
 
-	RoutesClient := network.NewRoutesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&RoutesClient.Client, o.ResourceManagerAuthorizer)
-
-	RouteFiltersClient := network.NewRouteFiltersClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&RouteFiltersClient.Client, o.ResourceManagerAuthorizer)
-
-	RouteTablesClient := network.NewRouteTablesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&RouteTablesClient.Client, o.ResourceManagerAuthorizer)
-
 	SecurityGroupClient := network.NewSecurityGroupsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&SecurityGroupClient.Client, o.ResourceManagerAuthorizer)
 
 	SecurityPartnerProviderClient := network.NewSecurityPartnerProvidersClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&SecurityPartnerProviderClient.Client, o.ResourceManagerAuthorizer)
 
-	SecurityRuleClient := network.NewSecurityRulesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&SecurityRuleClient.Client, o.ResourceManagerAuthorizer)
-
 	ServiceEndpointPoliciesClient := network.NewServiceEndpointPoliciesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&ServiceEndpointPoliciesClient.Client, o.ResourceManagerAuthorizer)
 
 	ServiceEndpointPolicyDefinitionsClient := network.NewServiceEndpointPolicyDefinitionsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&ServiceEndpointPolicyDefinitionsClient.Client, o.ResourceManagerAuthorizer)
-
-	ServiceTagsClient := network.NewServiceTagsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&ServiceTagsClient.Client, o.ResourceManagerAuthorizer)
 
 	SubnetsClient := network.NewSubnetsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&SubnetsClient.Client, o.ResourceManagerAuthorizer)
@@ -228,34 +170,24 @@ func NewClient(o *common.ClientOptions) *Client {
 	VirtualHubClient := network.NewVirtualHubsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&VirtualHubClient.Client, o.ResourceManagerAuthorizer)
 
-	vpnGatewaysClient := network.NewVpnGatewaysClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&vpnGatewaysClient.Client, o.ResourceManagerAuthorizer)
-
-	vpnConnectionsClient := network.NewVpnConnectionsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&vpnConnectionsClient.Client, o.ResourceManagerAuthorizer)
-
-	vpnSitesClient := network.NewVpnSitesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&vpnSitesClient.Client, o.ResourceManagerAuthorizer)
-
-	WatcherClient := network.NewWatchersClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&WatcherClient.Client, o.ResourceManagerAuthorizer)
-
-	WebApplicationFirewallPoliciesClient := network.NewWebApplicationFirewallPoliciesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&WebApplicationFirewallPoliciesClient.Client, o.ResourceManagerAuthorizer)
-
 	ServiceAssociationLinkClient := network.NewServiceAssociationLinksClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&ServiceAssociationLinkClient.Client, o.ResourceManagerAuthorizer)
 
 	ResourceNavigationLinkClient := network.NewResourceNavigationLinksClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&ResourceNavigationLinkClient.Client, o.ResourceManagerAuthorizer)
 
+	client, err := network_2023_06_01.NewClientWithBaseURI(o.Environment.ResourceManager, func(c *resourcemanager.Client) {
+		o.Configure(c, o.Authorizers.ResourceManager)
+	})
+	if err != nil {
+		return nil, fmt.Errorf("building clients for Network: %+v", err)
+	}
+
 	return &Client{
+		Client: client,
+
 		ApplicationGatewaysClient:              &ApplicationGatewaysClient,
-		ApplicationSecurityGroupsClient:        &ApplicationSecurityGroupsClient,
-		BastionHostsClient:                     &BastionHostsClient,
-		ConfigurationPolicyGroupClient:         &configurationPolicyGroupClient,
-		ConnectionMonitorsClient:               &ConnectionMonitorsClient,
-		DDOSProtectionPlansClient:              &DDOSProtectionPlansClient,
+		CustomIPPrefixesClient:                 &customIpPrefixesClient,
 		ExpressRouteAuthsClient:                &ExpressRouteAuthsClient,
 		ExpressRouteCircuitsClient:             &ExpressRouteCircuitsClient,
 		ExpressRouteCircuitConnectionClient:    &ExpressRouteCircuitConnectionClient,
@@ -263,32 +195,21 @@ func NewClient(o *common.ClientOptions) *Client {
 		ExpressRouteGatewaysClient:             &ExpressRouteGatewaysClient,
 		ExpressRoutePeeringsClient:             &ExpressRoutePeeringsClient,
 		ExpressRoutePortsClient:                &ExpressRoutePortsClient,
-		FlowLogsClient:                         &FlowLogsClient,
+		ExpressRoutePortAuthorizationsClient:   &ExpressRoutePortAuthorizationsClient,
 		HubRouteTableClient:                    &HubRouteTableClient,
 		HubVirtualNetworkConnectionClient:      &HubVirtualNetworkConnectionClient,
 		InterfacesClient:                       &InterfacesClient,
 		IPGroupsClient:                         &IpGroupsClient,
 		LocalNetworkGatewaysClient:             &LocalNetworkGatewaysClient,
-		ManagersClient:                         &ManagersClient,
-		ManagerNetworkGroupsClient:             &ManagerNetworkGroupsClient,
-		ManagerSubscriptionConnectionsClient:   &ManagerSubscriptionConnectionsClient,
 		NatRuleClient:                          &NatRuleClient,
 		PointToSiteVpnGatewaysClient:           &pointToSiteVpnGatewaysClient,
-		ProfileClient:                          &ProfileClient,
-		PacketCapturesClient:                   &PacketCapturesClient,
-		PrivateEndpointClient:                  &PrivateEndpointClient,
 		PublicIPsClient:                        &PublicIPsClient,
 		PublicIPPrefixesClient:                 &PublicIPPrefixesClient,
 		RouteMapsClient:                        &RouteMapsClient,
-		RoutesClient:                           &RoutesClient,
-		RouteFiltersClient:                     &RouteFiltersClient,
-		RouteTablesClient:                      &RouteTablesClient,
 		SecurityGroupClient:                    &SecurityGroupClient,
 		SecurityPartnerProviderClient:          &SecurityPartnerProviderClient,
-		SecurityRuleClient:                     &SecurityRuleClient,
 		ServiceEndpointPoliciesClient:          &ServiceEndpointPoliciesClient,
 		ServiceEndpointPolicyDefinitionsClient: &ServiceEndpointPolicyDefinitionsClient,
-		ServiceTagsClient:                      &ServiceTagsClient,
 		SubnetsClient:                          &SubnetsClient,
 		NatGatewayClient:                       &NatGatewayClient,
 		VirtualHubBgpConnectionClient:          &VirtualHubBgpConnectionClient,
@@ -300,15 +221,9 @@ func NewClient(o *common.ClientOptions) *Client {
 		VnetPeeringsClient:                     &VnetPeeringsClient,
 		VirtualWanClient:                       &VirtualWanClient,
 		VirtualHubClient:                       &VirtualHubClient,
-		VpnConnectionsClient:                   &vpnConnectionsClient,
-		VpnGatewaysClient:                      &vpnGatewaysClient,
-		VpnServerConfigurationsClient:          &vpnServerConfigurationsClient,
-		VpnSitesClient:                         &vpnSitesClient,
-		WatcherClient:                          &WatcherClient,
-		WebApplicationFirewallPoliciesClient:   &WebApplicationFirewallPoliciesClient,
 		PrivateDnsZoneGroupClient:              &PrivateDnsZoneGroupClient,
 		PrivateLinkServiceClient:               &PrivateLinkServiceClient,
 		ServiceAssociationLinkClient:           &ServiceAssociationLinkClient,
 		ResourceNavigationLinkClient:           &ResourceNavigationLinkClient,
-	}
+	}, nil
 }

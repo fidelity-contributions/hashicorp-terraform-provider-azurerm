@@ -34,7 +34,7 @@ resource "azurerm_data_factory_pipeline" "example" {
 
 ```hcl
 resource "azurerm_data_factory_pipeline" "test" {
-  name            = "acctest%d"
+  name            = "example"
   data_factory_id = azurerm_data_factory.test.id
   variables = {
     "bob" = "item1"
@@ -82,7 +82,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Data Factory Pipeline.
 

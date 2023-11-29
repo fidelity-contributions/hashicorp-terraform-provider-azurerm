@@ -64,7 +64,7 @@ The following arguments are supported:
 
 * `traffic_routing_method` - (Required) Specifies the algorithm used to route traffic. Possible values are `Geographic`, `Weighted`, `Performance`, `Priority`, `Subnet` and `MultiValue`.
   * `Geographic` - Traffic is routed based on Geographic regions specified in the Endpoint.
-  * `MultiValue` - All healthy Endpoints are returned.  MultiValue routing method works only if all the endpoints of type ‘External’ and are specified as IPv4 or IPv6 addresses.
+  * `MultiValue` - All healthy Endpoints are returned.  MultiValue routing method works only if all the endpoints of type `External` and are specified as IPv4 or IPv6 addresses.
   * `Performance` - Traffic is routed via the User's closest Endpoint
   * `Priority` - Traffic is routed to the Endpoint with the lowest `priority` value.
   * `Subnet` - Traffic is routed based on a mapping of sets of end-user IP address ranges to a specific Endpoint within a Traffic Manager profile.
@@ -72,9 +72,9 @@ The following arguments are supported:
 
 * `traffic_view_enabled` - (Optional) Indicates whether Traffic View is enabled for the Traffic Manager profile.
 
-* `dns_config` - (Required) This block specifies the DNS configuration of the Profile, it supports the fields documented below.
+* `dns_config` - (Required) This block specifies the DNS configuration of the Profile. One `dns_config` block as defined below.
 
-* `monitor_config` - (Required) This block specifies the Endpoint monitoring configuration for the Profile, it supports the fields documented below.
+* `monitor_config` - (Required) This block specifies the Endpoint monitoring configuration for the Profile. One `monitor_config` block as defined below.
 
 * `max_return` - (Optional) The amount of endpoints to return for DNS queries to this Profile. Possible values range from `1` to `8`.
 
@@ -114,13 +114,13 @@ The `monitor_config` block supports:
 
 A `custom_header` block supports the following:
 
-* `name` - (Required) The name of the custom header. Changing this forces a new resource to be created.
+* `name` - (Required) The name of the custom header.
 
 * `value` - (Required) The value of custom header. Applicable for HTTP and HTTPS protocol.
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Traffic Manager Profile.
 

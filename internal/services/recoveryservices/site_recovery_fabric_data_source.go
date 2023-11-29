@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package recoveryservices
 
 import (
@@ -63,9 +66,9 @@ func dataSourceSiteRecoveryFabricRead(d *pluginsdk.ResourceData, meta interface{
 	}
 
 	d.SetId(id.ID())
-	d.Set("name", id.FabricName)
+	d.Set("name", id.ReplicationFabricName)
 	d.Set("resource_group_name", id.ResourceGroupName)
-	d.Set("recovery_vault_name", id.ResourceName)
+	d.Set("recovery_vault_name", id.VaultName)
 
 	normalizedLocation := ""
 	if l := model.Location; l != nil {

@@ -51,7 +51,7 @@ The following arguments are supported:
 
 * `location` - (Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created.
 
-* `route` - (Optional) [List of objects](/docs/configuration/attr-as-blocks.html) representing routes. Each object accepts the arguments documented below.
+* `route` - (Optional) List of `route` objects representing routes as defined below. Each object accepts the arguments documented below.
 
 -> **NOTE** Since `route` can be configured both inline and via the separate `azurerm_route` resource, we have to explicitly set it to empty slice (`[]`) to remove it.
 
@@ -63,7 +63,7 @@ The following arguments are supported:
 
 A `route` block support:
 
-* `name` - (Required) The name of the route. Changing this forces a new resource to be created.
+* `name` - (Required) The name of the route.
 
 * `address_prefix` - (Required) The destination to which the route applies. Can be CIDR (such as `10.1.0.0/16`) or [Azure Service Tag](https://docs.microsoft.com/azure/virtual-network/service-tags-overview) (such as `ApiManagement`, `AzureBackup` or `AzureMonitor`) format.
 
@@ -73,7 +73,7 @@ A `route` block support:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The Route Table ID.
 * `subnets` - The collection of Subnets associated with this route table.

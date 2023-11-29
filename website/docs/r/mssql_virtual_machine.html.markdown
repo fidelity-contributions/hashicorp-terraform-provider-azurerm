@@ -43,13 +43,13 @@ The following arguments are supported:
 
 * `virtual_machine_id` - (Required) The ID of the Virtual Machine. Changing this forces a new resource to be created.
 
-* `sql_license_type` - (Required) The SQL Server license type. Possible values are `AHUB` (Azure Hybrid Benefit), `DR` (Disaster Recovery), and `PAYG` (Pay-As-You-Go). Changing this forces a new resource to be created.
+* `sql_license_type` - (Optional) The SQL Server license type. Possible values are `AHUB` (Azure Hybrid Benefit), `DR` (Disaster Recovery), and `PAYG` (Pay-As-You-Go). Changing this forces a new resource to be created.
 
 * `auto_backup` - (Optional) An `auto_backup` block as defined below. This block can be added to an existing resource, but removing this block forces a new resource to be created.
 
 * `auto_patching` - (Optional) An `auto_patching` block as defined below.
 
-* `key_vault_credential` - (Optional) (Optional) An `key_vault_credential` block as defined below.
+* `key_vault_credential` - (Optional) An `key_vault_credential` block as defined below.
 
 * `r_services_enabled` - (Optional) Should R Services be enabled?
 
@@ -66,6 +66,10 @@ The following arguments are supported:
 * `storage_configuration` - (Optional) An `storage_configuration` block as defined below.
 
 * `assessment` - (Optional) An `assessment` block as defined below.
+
+* `sql_virtual_machine_group_id` - (Optional) The ID of the SQL Virtual Machine Group that the SQL Virtual Machine belongs to.
+
+* `wsfc_domain_credential` - (Optional) A `wsfc_domain_credential` block as defined below
 
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 
@@ -153,13 +157,13 @@ The `storage_configuration` block supports the following:
 
 * `storage_workload_type` - (Required) The type of storage workload. Valid values include `GENERAL`, `OLTP`, or `DW`.
 
-* `data_settings` - (Optional) An `storage_settings` as defined below.
+* `data_settings` - (Optional) A `storage_settings` block as defined below.
 
-* `log_settings` - (Optional) An `storage_settings` as defined below.
+* `log_settings` - (Optional) A `storage_settings` block as defined below.
 
 * `system_db_on_data_disk_enabled` - (Optional) Specifies whether to set system databases (except tempDb) location to newly created data storage. Possible values are `true` and `false`. Defaults to `false`.
 
-* `temp_db_settings` - (Optional) An `temp_db_settings` as defined below.
+* `temp_db_settings` - (Optional) An `temp_db_settings` block as defined below.
 
 ---
 
@@ -207,13 +211,23 @@ The `schedule` block supports the following:
 
 ~> **NOTE:** Either one of `weekly_interval` or `monthly_occurrence` must be specified.
 
-* `day_of_week` - (Required) What day of the week the assessment will be run. Default value is `Monday`. Possible values are `Friday`, `Monday`, `Saturday`, `Sunday`, `Thursday`, `Tuesday` and `Wednesday`.
+* `day_of_week` - (Required) What day of the week the assessment will be run. Possible values are `Friday`, `Monday`, `Saturday`, `Sunday`, `Thursday`, `Tuesday` and `Wednesday`.
 
 * `start_time` - (Required) What time the assessment will be run. Must be in the format `HH:mm`.
 
+---
+
+The `wsfc_domain_credential` block supports the following:
+
+* `cluster_bootstrap_account_password` - (Required) The account password used for creating cluster.
+
+* `cluster_operator_account_password` - (Required) The account password used for operating cluster.
+
+* `sql_service_account_password` - (Required) The account password under which SQL service will run on all participating SQL virtual machines in the cluster.
+
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the SQL Virtual Machine.
 

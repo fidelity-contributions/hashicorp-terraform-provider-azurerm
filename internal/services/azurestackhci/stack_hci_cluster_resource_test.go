@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package azurestackhci_test
 
 import (
@@ -6,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/go-azure-helpers/lang/response"
-	"github.com/hashicorp/go-azure-sdk/resource-manager/azurestackhci/2022-09-01/clusters"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/azurestackhci/2023-08-01/clusters"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance/check"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
@@ -83,8 +86,31 @@ func TestAccStackHCICluster_update(t *testing.T) {
 	})
 }
 
+func TestAccStackHCICluster_automanageConfigurationAssignment(t *testing.T) {
+	data := acceptance.BuildTestData(t, "azurerm_stack_hci_cluster", "test")
+	r := StackHCIClusterResource{}
+
+	data.ResourceTest(t, r, []acceptance.TestStep{
+		{
+			Config: r.automanageConfigurationAssignment(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+				check.That(data.ResourceName).Key("automanage_configuration_id").Exists(),
+			),
+		},
+		data.ImportStep(),
+		{
+			Config: r.removeAutomanageConfigurationAssignment(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+			),
+		},
+		data.ImportStep(),
+	})
+}
+
 func (r StackHCIClusterResource) Exists(ctx context.Context, client *clients.Client, state *pluginsdk.InstanceState) (*bool, error) {
-	clusterClient := client.AzureStackHCI.ClusterClient
+	clusterClient := client.AzureStackHCI.Clusters
 	id, err := clusters.ParseClusterID(state.ID)
 	if err != nil {
 		return nil, err
@@ -189,4 +215,71 @@ resource "azurerm_resource_group" "test" {
   location = "%s"
 }
 `, data.RandomInteger, data.RandomInteger, data.Locations.Primary)
+}
+
+func (r StackHCIClusterResource) automanageConfigurationAssignment(data acceptance.TestData) string {
+	return fmt.Sprintf(`
+provider "azurerm" {
+  features {}
+}
+
+data "azurerm_client_config" "current" {}
+
+resource "azurerm_resource_group" "test" {
+  name     = "acctest-rg-%d"
+  location = "%s"
+}
+
+resource "azurerm_automanage_configuration" "test" {
+  name                = "acctest-amcp-%d"
+  resource_group_name = azurerm_resource_group.test.name
+  location            = azurerm_resource_group.test.location
+}
+
+resource "azurerm_stack_hci_cluster" "test" {
+  name                        = "acctest-StackHCICluster-%d"
+  resource_group_name         = azurerm_resource_group.test.name
+  location                    = azurerm_resource_group.test.location
+  client_id                   = data.azurerm_client_config.current.client_id
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  automanage_configuration_id = azurerm_automanage_configuration.test.id
+
+  tags = {
+    ENV = "Test"
+  }
+}
+`, data.RandomInteger, data.Locations.Primary, data.RandomInteger, data.RandomInteger)
+}
+
+func (r StackHCIClusterResource) removeAutomanageConfigurationAssignment(data acceptance.TestData) string {
+	return fmt.Sprintf(`
+provider "azurerm" {
+  features {}
+}
+
+data "azurerm_client_config" "current" {}
+
+resource "azurerm_resource_group" "test" {
+  name     = "acctest-rg-%d"
+  location = "%s"
+}
+
+resource "azurerm_automanage_configuration" "test" {
+  name                = "acctest-amcp-%d"
+  resource_group_name = azurerm_resource_group.test.name
+  location            = azurerm_resource_group.test.location
+}
+
+resource "azurerm_stack_hci_cluster" "test" {
+  name                = "acctest-StackHCICluster-%d"
+  resource_group_name = azurerm_resource_group.test.name
+  location            = azurerm_resource_group.test.location
+  client_id           = data.azurerm_client_config.current.client_id
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+
+  tags = {
+    ENV = "Test"
+  }
+}
+`, data.RandomInteger, data.Locations.Primary, data.RandomInteger, data.RandomInteger)
 }

@@ -35,7 +35,7 @@ resource "azurerm_mssql_server" "primary" {
 resource "azurerm_mssql_server" "secondary" {
   name                         = "mssqlserver-secondary"
   resource_group_name          = azurerm_resource_group.example.name
-  location                     = azurerm_resource_group.example.location
+  location                     = "North Europe"
   version                      = "12.0"
   administrator_login          = "missadministrator"
   administrator_login_password = "thisIsKat12"
@@ -106,7 +106,7 @@ The `read_write_endpoint_failover_policy` block supports the following:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Failover Group.
 

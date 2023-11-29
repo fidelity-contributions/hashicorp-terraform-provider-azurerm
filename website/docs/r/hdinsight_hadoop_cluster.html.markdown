@@ -99,6 +99,8 @@ The following arguments are supported:
 
 * `network` - (Optional) A `network` block as defined below.
 
+* `disk_encryption` - (Optional) One or more `disk_encryption` block as defined below.
+
 * `compute_isolation` - (Optional) A `compute_isolation` block as defined below.
 
 * `storage_account_gen2` - (Optional) A `storage_account_gen2` block as defined below.
@@ -119,7 +121,7 @@ The following arguments are supported:
 
 * `extension` - (Optional) An `extension` block as defined below.
   
-* `security_profile` - (Optional) A `security_profile` block as defined below.
+* `security_profile` - (Optional) A `security_profile` block as defined below. Changing this forces a new resource to be created.
 
 ---
 
@@ -157,7 +159,7 @@ A `head_node` block supports the following:
 
 * `virtual_network_id` - (Optional) The ID of the Virtual Network where the Head Nodes should be provisioned within. Changing this forces a new resource to be created.
 
-* `script_actions` - (Optional)  The script action which will run on the cluster.
+* `script_actions` - (Optional) The script action which will run on the cluster. One or more `script_actions` blocks as defined below.
 
 ---
 
@@ -167,7 +169,7 @@ A `script_actions` block supports the following:
 
 * `uri` - (Required) The URI to the script.
 
-* `parameters` - (Required) The parameters for the script provided.
+* `parameters` - (Optional) The parameters for the script provided.
 
 ---
 
@@ -189,7 +191,7 @@ A `network` block supports the following:
 
 -> **NOTE:** To enabled the private link the `connection_direction` must be set to `Outbound`.
 
-* `private_link_enabled` - (Optional) Is the private link enabled? Possible values include `True` or `False`. Defaults to `False`. Changing this forces a new resource to be created.
+* `private_link_enabled` - (Optional) Is the private link enabled? Possible values include `true` or `false`. Defaults to `false`. Changing this forces a new resource to be created.
 
 ---
 
@@ -255,6 +257,8 @@ A `worker_node` block supports the following:
 
 * `autoscale` - (Optional) A `autoscale` block as defined below.
 
+* `script_actions` - (Optional) The script action which will run on the cluster. One or more `script_actions` blocks as defined above.
+
 ---
 
 A `disk_encryption` block supports the following:
@@ -287,27 +291,35 @@ A `zookeeper_node` block supports the following:
 
 * `virtual_network_id` - (Optional) The ID of the Virtual Network where the Zookeeper Nodes should be provisioned within. Changing this forces a new resource to be created.
 
+* `script_actions` - (Optional) The script action which will run on the cluster. One or more `script_actions` blocks as defined above.
+
 ---
 
 A `edge_node` block supports the following:
 
-* `vm_size` - (Required) The Size of the Virtual Machine which should be used as the Edge Nodes. Possible values are `ExtraSmall`, `Small`, `Medium`, `Large`, `ExtraLarge`, `A5`, `A6`, `A7`, `A8`, `A9`, `A10`, `A11`, `Standard_A1_V2`, `Standard_A2_V2`, `Standard_A2m_V2`, `Standard_A3`, `Standard_A4_V2`, `Standard_A4m_V2`, `Standard_A8_V2`, `Standard_A8m_V2`, `Standard_D1`, `Standard_D2`, `Standard_D3`, `Standard_D4`, `Standard_D11`, `Standard_D12`, `Standard_D13`, `Standard_D14`, `Standard_D1_V2`, `Standard_D2_V2`, `Standard_D3_V2`, `Standard_D4_V2`, `Standard_D5_V2`, `Standard_D11_V2`, `Standard_D12_V2`, `Standard_D13_V2`, `Standard_D14_V2`, `Standard_DS1_V2`, `Standard_DS2_V2`, `Standard_DS3_V2`, `Standard_DS4_V2`, `Standard_DS5_V2`, `Standard_DS11_V2`, `Standard_DS12_V2`, `Standard_DS13_V2`, `Standard_DS14_V2`, `Standard_E2_V3`, `Standard_E4_V3`, `Standard_E8_V3`, `Standard_E16_V3`, `Standard_E20_V3`, `Standard_E32_V3`, `Standard_E64_V3`, `Standard_E64i_V3`, `Standard_E2s_V3`, `Standard_E4s_V3`, `Standard_E8s_V3`, `Standard_E16s_V3`, `Standard_E20s_V3`, `Standard_E32s_V3`, `Standard_E64s_V3`, `Standard_E64is_V3`, `Standard_D2a_V4`, `Standard_D4a_V4`, `Standard_D8a_V4`, `Standard_D16a_V4`, `Standard_D32a_V4`, `Standard_D48a_V4`, `Standard_D64a_V4`, `Standard_D96a_V4`, `Standard_E2a_V4`, `Standard_E4a_V4`, `Standard_E8a_V4`, `Standard_E16a_V4`, `Standard_E20a_V4`, `Standard_E32a_V4`, `Standard_E48a_V4`, `Standard_E64a_V4`, `Standard_E96a_V4`, `Standard_G1`, `Standard_G2`, `Standard_G3`, `Standard_G4`, `Standard_G5`, `Standard_F2s_V2`, `Standard_F4s_V2`, `Standard_F8s_V2`, `Standard_F16s_V2`, `Standard_F32s_V2`, `Standard_F64s_V2`, `Standard_F72s_V2`, `Standard_GS1`, `Standard_GS2`, `Standard_GS3`, `Standard_GS4`, `Standard_GS5` and `Standard_NC24`. Changing this forces a new resource to be created.
+* `target_instance_count` - (Required) The number of instances which should be run for the Worker Nodes.
+
+* `vm_size` - (Required) The Size of the Virtual Machine which should be used as the Edge Nodes. Possible values are `ExtraSmall`, `Small`, `Medium`, `Large`, `ExtraLarge`, `A5`, `A6`, `A7`, `A8`, `A9`, `A10`, `A11`, `Standard_A1_V2`, `Standard_A2_V2`, `Standard_A2m_V2`, `Standard_A3`, `Standard_A4_V2`, `Standard_A4m_V2`, `Standard_A8_V2`, `Standard_A8m_V2`, `Standard_D1`, `Standard_D2`, `Standard_D3`, `Standard_D4`, `Standard_D11`, `Standard_D12`, `Standard_D13`, `Standard_D14`, `Standard_D1_V2`, `Standard_D2_V2`, `Standard_D3_V2`, `Standard_D4_V2`, `Standard_D5_V2`, `Standard_D11_V2`, `Standard_D12_V2`, `Standard_D13_V2`, `Standard_D14_V2`, `Standard_DS1_V2`, `Standard_DS2_V2`, `Standard_DS3_V2`, `Standard_DS4_V2`, `Standard_DS5_V2`, `Standard_DS11_V2`, `Standard_DS12_V2`, `Standard_DS13_V2`, `Standard_DS14_V2`, `Standard_E2_V3`, `Standard_E4_V3`, `Standard_E8_V3`, `Standard_E16_V3`, `Standard_E20_V3`, `Standard_E32_V3`, `Standard_E64_V3`, `Standard_E64i_V3`, `Standard_E2s_V3`, `Standard_E4s_V3`, `Standard_E8s_V3`, `Standard_E16s_V3`, `Standard_E20s_V3`, `Standard_E32s_V3`, `Standard_E64s_V3`, `Standard_E64is_V3`, `Standard_D2a_V4`, `Standard_D4a_V4`, `Standard_D8a_V4`, `Standard_D16a_V4`, `Standard_D32a_V4`, `Standard_D48a_V4`, `Standard_D64a_V4`, `Standard_D96a_V4`, `Standard_E2a_V4`, `Standard_E4a_V4`, `Standard_E8a_V4`, `Standard_E16a_V4`, `Standard_E20a_V4`, `Standard_E32a_V4`, `Standard_E48a_V4`, `Standard_E64a_V4`, `Standard_E96a_V4`, `Standard_G1`, `Standard_G2`, `Standard_G3`, `Standard_G4`, `Standard_G5`, `Standard_F2s_V2`, `Standard_F4s_V2`, `Standard_F8s_V2`, `Standard_F16s_V2`, `Standard_F32s_V2`, `Standard_F64s_V2`, `Standard_F72s_V2`, `Standard_GS1`, `Standard_GS2`, `Standard_GS3`, `Standard_GS4`, `Standard_GS5` and `Standard_NC24`.
 
 * `install_script_action` - (Required) A `install_script_action` block as defined below.
+
+* `https_endpoints` - (Optional) The HTTPS Connectivity Endpoint for this HDInsight Hadoop Cluster. One or more `https_endpoints` blocks as defined below.
+
+* `uninstall_script_actions` - (Optional) A `uninstall_script_actions` block as defined below.
 
 ---
 
 A `install_script_action` block supports the following:
 
-* `name` - (Required) The name of the install script action. Changing this forces a new resource to be created.
+* `name` - (Required) The name of the install script action.
 
-* `uri` - (Required) The URI pointing to the script to run during the installation of the edge node. Changing this forces a new resource to be created.
+* `uri` - (Required) The URI pointing to the script to run during the installation of the edge node.
 
 * `parameters` - (Optional) The parameters for the script.
 
 ---
 
-A `https_endpints` block supports the following:
+A `https_endpoints` block supports the following:
 
 * `access_modes` - (Optional) A list of access modes for the application.
 
@@ -323,9 +335,9 @@ A `https_endpints` block supports the following:
 
 A `uninstall_script_actions` block supports the following:
 
-* `name` - (Required) The name of the uninstall script action. Changing this forces a new resource to be created.
+* `name` - (Required) The name of the uninstall script action.
 
-* `uri` - (Required) The URI pointing to the script to run during the installation of the edge node. Changing this forces a new resource to be created.
+* `uri` - (Required) The URI pointing to the script to run during the installation of the edge node.
 
 * `parameters` - (Optional) The parameters for the script.
 
@@ -343,37 +355,37 @@ A `metastores` block supports the following:
 
 A `hive` block supports the following:
 
-* `server` - (Required) The fully-qualified domain name (FQDN) of the SQL server to use for the external Hive metastore.  Changing this forces a new resource to be created.
+* `server` - (Required) The fully-qualified domain name (FQDN) of the SQL server to use for the external Hive metastore. Changing this forces a new resource to be created.
 
-* `database_name` - (Required) The external Hive metastore's existing SQL database.  Changing this forces a new resource to be created.
+* `database_name` - (Required) The external Hive metastore's existing SQL database. Changing this forces a new resource to be created.
 
-* `username` - (Required) The external Hive metastore's existing SQL server admin username.  Changing this forces a new resource to be created.
+* `username` - (Required) The external Hive metastore's existing SQL server admin username. Changing this forces a new resource to be created.
 
-* `password` - (Required) The external Hive metastore's existing SQL server admin password.  Changing this forces a new resource to be created.
+* `password` - (Required) The external Hive metastore's existing SQL server admin password. Changing this forces a new resource to be created.
 
 ---
 
 An `oozie` block supports the following:
 
-* `server` - (Required) The fully-qualified domain name (FQDN) of the SQL server to use for the external Oozie metastore.  Changing this forces a new resource to be created.
+* `server` - (Required) The fully-qualified domain name (FQDN) of the SQL server to use for the external Oozie metastore. Changing this forces a new resource to be created.
 
-* `database_name` - (Required) The external Oozie metastore's existing SQL database.  Changing this forces a new resource to be created.
+* `database_name` - (Required) The external Oozie metastore's existing SQL database. Changing this forces a new resource to be created.
 
-* `username` - (Required) The external Oozie metastore's existing SQL server admin username.  Changing this forces a new resource to be created.
+* `username` - (Required) The external Oozie metastore's existing SQL server admin username. Changing this forces a new resource to be created.
 
-* `password` - (Required) The external Oozie metastore's existing SQL server admin password.  Changing this forces a new resource to be created.
+* `password` - (Required) The external Oozie metastore's existing SQL server admin password. Changing this forces a new resource to be created.
 
 ---
 
 An `ambari` block supports the following:
 
-* `server` - (Required) The fully-qualified domain name (FQDN) of the SQL server to use for the external Ambari metastore.  Changing this forces a new resource to be created.
+* `server` - (Required) The fully-qualified domain name (FQDN) of the SQL server to use for the external Ambari metastore. Changing this forces a new resource to be created.
 
-* `database_name` - (Required) The external Hive metastore's existing SQL database.  Changing this forces a new resource to be created.
+* `database_name` - (Required) The external Hive metastore's existing SQL database. Changing this forces a new resource to be created.
 
-* `username` - (Required) The external Ambari metastore's existing SQL server admin username.  Changing this forces a new resource to be created.
+* `username` - (Required) The external Ambari metastore's existing SQL server admin username. Changing this forces a new resource to be created.
 
-* `password` - (Required) The external Ambari metastore's existing SQL server admin password.  Changing this forces a new resource to be created.
+* `password` - (Required) The external Ambari metastore's existing SQL server admin password. Changing this forces a new resource to be created.
 
 ---
 
@@ -447,7 +459,7 @@ A `security_profile` block supports the following:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the HDInsight Hadoop Cluster.
 

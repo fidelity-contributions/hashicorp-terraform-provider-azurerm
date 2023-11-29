@@ -7,7 +7,7 @@ description: |-
 ---
 # azurerm_nat_gateway
 
-Manages a Azure NAT Gateway.
+Manages an Azure NAT Gateway.
 
 ## Example Usage
 
@@ -15,23 +15,6 @@ Manages a Azure NAT Gateway.
 resource "azurerm_resource_group" "example" {
   name     = "nat-gateway-example-rg"
   location = "West Europe"
-}
-
-resource "azurerm_public_ip" "example" {
-  name                = "nat-gateway-publicIP"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  zones               = ["1"]
-}
-
-resource "azurerm_public_ip_prefix" "example" {
-  name                = "nat-gateway-publicIPPrefix"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
-  prefix_length       = 30
-  zones               = ["1"]
 }
 
 resource "azurerm_nat_gateway" "example" {
@@ -43,6 +26,8 @@ resource "azurerm_nat_gateway" "example" {
   zones                   = ["1"]
 }
 ```
+
+For more complete examples, please see the [azurerm_nat_gateway_public_ip_association](nat_gateway_public_ip_association.html) and [azurerm_nat_gateway_public_ip_prefix_association](nat_gateway_public_ip_prefix_association.html) resources.
 
 ## Argument Reference
 
@@ -60,11 +45,13 @@ The following arguments are supported:
 
 * `tags` - (Optional) A mapping of tags to assign to the resource. 
 
-* `zones` - (Optional) Specifies a list of Availability Zones in which this NAT Gateway should be located. Changing this forces a new NAT Gateway to be created.
+* `zones` - (Optional) A list of Availability Zones in which this NAT Gateway should be located. Changing this forces a new NAT Gateway to be created.
+
+-> **NOTE:** Only one Availability Zone can be defined. For more information, please check out the [Azure documentation](https://learn.microsoft.com/en-us/azure/nat-gateway/nat-overview#availability-zones)
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the NAT Gateway.
 

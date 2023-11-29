@@ -100,7 +100,7 @@ The following arguments are supported:
 
 * `amount` - (Required) The total amount of cost to track with the budget.
 
-* `time_grain` - (Optional) The time covered by a budget. Tracking of the amount will be reset based on the time grain. Must be one of `BillingAnnual`, `BillingMonth`, `BillingQuarter`, `Annually`, `Monthly` and `Quarterly`. Defaults to `Monthly`.
+* `time_grain` - (Optional) The time covered by a budget. Tracking of the amount will be reset based on the time grain. Must be one of `BillingAnnual`, `BillingMonth`, `BillingQuarter`, `Annually`, `Monthly` and `Quarterly`. Defaults to `Monthly`. Changing this forces a new resource to be created.
 
 * `time_period` - (Required) A `time_period` block as defined below.
 
@@ -152,7 +152,7 @@ A `dimension` block supports the following:
 
 * `name` - (Required) The name of the column to use for the filter. The allowed values are `ChargeType`, `Frequency`, `InvoiceId`, `Meter`, `MeterCategory`, `MeterSubCategory`, `PartNumber`, `PricingModel`, `Product`, `ProductOrderId`, `ProductOrderName`, `PublisherType`, `ReservationId`, `ReservationName`, `ResourceGroupName`, `ResourceGuid`, `ResourceId`, `ResourceLocation`, `ResourceType`, `ServiceFamily`, `ServiceName`, `SubscriptionID`, `SubscriptionName`, `UnitOfMeasure`.
 
-* `operator` - (Optional) The operator to use for comparison. The allowed values are `In`.
+* `operator` - (Optional) The operator to use for comparison. The allowed values are `In`. Defaults to `In`.
 
 * `values` - (Required) Specifies a list of values for the column.
 
@@ -162,7 +162,7 @@ A `tag` block supports the following:
 
 * `name` - (Required) The name of the tag to use for the filter.
 
-* `operator` - (Optional) The operator to use for comparison. The allowed values are `In`.
+* `operator` - (Optional) The operator to use for comparison. The allowed values are `In`. Defaults to `In`.
 
 * `values` - (Required) Specifies a list of values for the tag.
 

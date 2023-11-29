@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package maintenance_test
 
 import (
@@ -9,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance/check"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
-	"github.com/hashicorp/terraform-provider-azurerm/internal/services/maintenance/parse"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
 )
@@ -47,20 +49,34 @@ func TestAccMaintenanceAssignmentVirtualMachine_requiresImport(t *testing.T) {
 	})
 }
 
+func TestAccMaintenanceAssignmentVirtualMachine_linkMultipleMaintenanceAssignmentsToOneVM(t *testing.T) {
+	data := acceptance.BuildTestData(t, "azurerm_maintenance_assignment_virtual_machine", "test")
+	r := MaintenanceAssignmentVirtualMachineResource{}
+
+	data.ResourceTest(t, r, []acceptance.TestStep{
+		{
+			Config: r.linkMultipleMaintenanceAssignmentsToOneVM(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+			),
+		},
+		// location not returned by list rest api
+		data.ImportStep("location"),
+	})
+}
+
 func (MaintenanceAssignmentVirtualMachineResource) Exists(ctx context.Context, clients *clients.Client, state *pluginsdk.InstanceState) (*bool, error) {
-	maintenanceAssignmentVirtualMachineId, err := parse.MaintenanceAssignmentVirtualMachineID(state.ID)
+	id, err := configurationassignments.ParseScopedConfigurationAssignmentID(state.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	id := configurationassignments.NewProviderID(maintenanceAssignmentVirtualMachineId.VirtualMachineId.SubscriptionId, maintenanceAssignmentVirtualMachineId.VirtualMachineId.ResourceGroup, "Microsoft.Compute", "virtualMachines", maintenanceAssignmentVirtualMachineId.VirtualMachineId.Name)
-
-	resp, err := clients.Maintenance.ConfigurationAssignmentsClient.List(ctx, id)
+	resp, err := clients.Maintenance.ConfigurationAssignmentsClient.Get(ctx, *id)
 	if err != nil {
-		return nil, fmt.Errorf("retrieving Maintenance Assignment Virtual Machine (target resource id: %q): %v", maintenanceAssignmentVirtualMachineId.VirtualMachineIdRaw, err)
+		return nil, fmt.Errorf("retrieving %s: %v", id, err)
 	}
 
-	return utils.Bool(resp.Model != nil && resp.Model.Value != nil && len(*resp.Model.Value) != 0), nil
+	return utils.Bool(resp.Model != nil), nil
 }
 
 func (r MaintenanceAssignmentVirtualMachineResource) basic(data acceptance.TestData) string {
@@ -152,10 +168,35 @@ resource "azurerm_linux_virtual_machine" "test" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "16.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
   }
 }
 `, data.RandomInteger, data.Locations.Primary)
+}
+
+func (r MaintenanceAssignmentVirtualMachineResource) linkMultipleMaintenanceAssignmentsToOneVM(data acceptance.TestData) string {
+	return fmt.Sprintf(`
+%s
+
+resource "azurerm_maintenance_configuration" "test2" {
+  name                = "acctest-MC2%[2]d"
+  resource_group_name = azurerm_resource_group.test.name
+  location            = azurerm_resource_group.test.location
+  scope               = "SQLDB"
+}
+
+resource "azurerm_maintenance_assignment_virtual_machine" "test" {
+  location                     = azurerm_resource_group.test.location
+  maintenance_configuration_id = azurerm_maintenance_configuration.test.id
+  virtual_machine_id           = azurerm_linux_virtual_machine.test.id
+}
+
+resource "azurerm_maintenance_assignment_virtual_machine" "test2" {
+  location                     = azurerm_resource_group.test.location
+  maintenance_configuration_id = azurerm_maintenance_configuration.test2.id
+  virtual_machine_id           = azurerm_linux_virtual_machine.test.id
+}
+`, r.template(data), data.RandomInteger)
 }

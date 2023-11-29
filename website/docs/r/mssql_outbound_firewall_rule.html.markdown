@@ -45,7 +45,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The SQL Outbound Firewall Rule ID.
 
@@ -54,7 +54,6 @@ The following attributes are exported:
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/language/resources/syntax#operation-timeouts) for certain actions:
 
 * `create` - (Defaults to 30 minutes) Used when creating the SQL Outbound Firewall Rule.
-* `update` - (Defaults to 30 minutes) Used when updating the SQL Outbound Firewall Rule.
 * `read` - (Defaults to 5 minutes) Used when retrieving the SQL Outbound Firewall Rule.
 * `delete` - (Defaults to 30 minutes) Used when deleting the SQL Outbound Firewall Rule.
 

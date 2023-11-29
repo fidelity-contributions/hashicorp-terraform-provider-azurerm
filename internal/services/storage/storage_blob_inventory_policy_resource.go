@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package storage
 
 import (
@@ -7,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2021-09-01/storage" // nolint: staticcheck
+	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonids"
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/tf"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/storage/parse"
@@ -57,7 +61,7 @@ func storageBlobInventoryPolicyResourceSchema() map[string]*pluginsdk.Schema {
 			Type:         pluginsdk.TypeString,
 			Required:     true,
 			ForceNew:     true,
-			ValidateFunc: validate.StorageAccountID,
+			ValidateFunc: commonids.ValidateStorageAccountID,
 		},
 
 		"rules": {
@@ -153,6 +157,17 @@ func storageBlobInventoryPolicyResourceSchema() map[string]*pluginsdk.Schema {
 								"prefix_match": {
 									Type:     pluginsdk.TypeSet,
 									Optional: true,
+									MaxItems: 10,
+									Elem: &pluginsdk.Schema{
+										Type:         pluginsdk.TypeString,
+										ValidateFunc: validation.StringIsNotEmpty,
+									},
+								},
+
+								"exclude_prefixes": {
+									Type:     pluginsdk.TypeSet,
+									Optional: true,
+									MaxItems: 10,
 									Elem: &pluginsdk.Schema{
 										Type:         pluginsdk.TypeString,
 										ValidateFunc: validation.StringIsNotEmpty,
@@ -173,12 +188,12 @@ func resourceStorageBlobInventoryPolicyCreateUpdate(d *pluginsdk.ResourceData, m
 	ctx, cancel := timeouts.ForCreateUpdate(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
-	storageAccount, err := parse.StorageAccountID(d.Get("storage_account_id").(string))
+	storageAccount, err := commonids.ParseStorageAccountID(d.Get("storage_account_id").(string))
 	if err != nil {
 		return err
 	}
 
-	id := parse.NewBlobInventoryPolicyID(subscriptionId, storageAccount.ResourceGroup, storageAccount.Name, "Default")
+	id := parse.NewBlobInventoryPolicyID(subscriptionId, storageAccount.ResourceGroupName, storageAccount.StorageAccountName, "Default")
 
 	if d.IsNewResource() {
 		existing, err := client.Get(ctx, id.ResourceGroup, id.StorageAccountName)
@@ -229,7 +244,7 @@ func resourceStorageBlobInventoryPolicyRead(d *pluginsdk.ResourceData, meta inte
 		}
 		return fmt.Errorf("retrieving %q: %+v", id, err)
 	}
-	d.Set("storage_account_id", parse.NewStorageAccountID(subscriptionId, id.ResourceGroup, id.StorageAccountName).ID())
+	d.Set("storage_account_id", commonids.NewStorageAccountID(subscriptionId, id.ResourceGroup, id.StorageAccountName).ID())
 	if props := resp.BlobInventoryPolicyProperties; props != nil {
 		if policy := props.Policy; policy != nil {
 			if policy.Enabled == nil || !*policy.Enabled {
@@ -287,6 +302,7 @@ func expandBlobInventoryPolicyFilter(input []interface{}) *storage.BlobInventory
 	v := input[0].(map[string]interface{})
 	return &storage.BlobInventoryPolicyFilter{
 		PrefixMatch:         utils.ExpandStringSlice(v["prefix_match"].(*pluginsdk.Set).List()),
+		ExcludePrefix:       utils.ExpandStringSlice(v["exclude_prefixes"].(*pluginsdk.Set).List()),
 		BlobTypes:           utils.ExpandStringSlice(v["blob_types"].(*pluginsdk.Set).List()),
 		IncludeBlobVersions: utils.Bool(v["include_blob_versions"].(bool)),
 		IncludeDeleted:      utils.Bool(v["include_deleted"].(bool)),
@@ -352,6 +368,7 @@ func flattenBlobInventoryPolicyFilter(input *storage.BlobInventoryPolicyFilter) 
 			"include_deleted":       includeDeleted,
 			"include_snapshots":     includeSnapshots,
 			"prefix_match":          utils.FlattenStringSlice(input.PrefixMatch),
+			"exclude_prefixes":      utils.FlattenStringSlice(input.ExcludePrefix),
 		},
 	}
 }

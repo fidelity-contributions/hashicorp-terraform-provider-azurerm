@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package network
 
 import (
@@ -13,7 +16,7 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/validation"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/timeouts"
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
-	"github.com/tombuildsstuff/kermit/sdk/network/2022-05-01/network"
+	"github.com/tombuildsstuff/kermit/sdk/network/2022-07-01/network"
 )
 
 func resourceExpressRouteCircuitConnection() *pluginsdk.Resource {
@@ -198,7 +201,7 @@ func resourceExpressRouteCircuitConnectionRead(d *pluginsdk.ResourceData, meta i
 		d.Set("address_prefix_ipv6", addressPrefixIPv6)
 
 		if props.PeerExpressRouteCircuitPeering != nil && props.PeerExpressRouteCircuitPeering.ID != nil {
-			circuitPeerPeeringId, err := parse.ExpressRouteCircuitPeeringID(*props.PeerExpressRouteCircuitPeering.ID)
+			circuitPeerPeeringId, err := parse.ExpressRouteCircuitPeeringIDInsensitively(*props.PeerExpressRouteCircuitPeering.ID)
 			if err != nil {
 				return err
 			}

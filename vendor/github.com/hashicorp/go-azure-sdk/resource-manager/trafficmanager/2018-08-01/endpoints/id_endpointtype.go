@@ -7,25 +7,28 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = EndpointTypeId{}
 
 // EndpointTypeId is a struct representing the Resource ID for a Endpoint Type
 type EndpointTypeId struct {
-	SubscriptionId    string
-	ResourceGroupName string
-	ProfileName       string
-	EndpointType      EndpointType
-	EndpointName      string
+	SubscriptionId            string
+	ResourceGroupName         string
+	TrafficManagerProfileName string
+	EndpointType              EndpointType
+	EndpointName              string
 }
 
 // NewEndpointTypeID returns a new EndpointTypeId struct
-func NewEndpointTypeID(subscriptionId string, resourceGroupName string, profileName string, endpointType EndpointType, endpointName string) EndpointTypeId {
+func NewEndpointTypeID(subscriptionId string, resourceGroupName string, trafficManagerProfileName string, endpointType EndpointType, endpointName string) EndpointTypeId {
 	return EndpointTypeId{
-		SubscriptionId:    subscriptionId,
-		ResourceGroupName: resourceGroupName,
-		ProfileName:       profileName,
-		EndpointType:      endpointType,
-		EndpointName:      endpointName,
+		SubscriptionId:            subscriptionId,
+		ResourceGroupName:         resourceGroupName,
+		TrafficManagerProfileName: trafficManagerProfileName,
+		EndpointType:              endpointType,
+		EndpointName:              endpointName,
 	}
 }
 
@@ -37,35 +40,9 @@ func ParseEndpointTypeID(input string) (*EndpointTypeId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := EndpointTypeId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.ProfileName, ok = parsed.Parsed["profileName"]; !ok {
-		return nil, fmt.Errorf("the segment 'profileName' was not found in the resource id %q", input)
-	}
-
-	if v, ok := parsed.Parsed["endpointType"]; true {
-		if !ok {
-			return nil, fmt.Errorf("the segment 'endpointType' was not found in the resource id %q", input)
-		}
-
-		endpointType, err := parseEndpointType(v)
-		if err != nil {
-			return nil, fmt.Errorf("parsing %q: %+v", v, err)
-		}
-		id.EndpointType = *endpointType
-	}
-
-	if id.EndpointName, ok = parsed.Parsed["endpointName"]; !ok {
-		return nil, fmt.Errorf("the segment 'endpointName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -80,38 +57,46 @@ func ParseEndpointTypeIDInsensitively(input string) (*EndpointTypeId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := EndpointTypeId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
+	return &id, nil
+}
+
+func (id *EndpointTypeId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
 	}
 
-	if id.ProfileName, ok = parsed.Parsed["profileName"]; !ok {
-		return nil, fmt.Errorf("the segment 'profileName' was not found in the resource id %q", input)
+	if id.ResourceGroupName, ok = input.Parsed["resourceGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroupName", input)
 	}
 
-	if v, ok := parsed.Parsed["endpointType"]; true {
+	if id.TrafficManagerProfileName, ok = input.Parsed["trafficManagerProfileName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "trafficManagerProfileName", input)
+	}
+
+	if v, ok := input.Parsed["endpointType"]; true {
 		if !ok {
-			return nil, fmt.Errorf("the segment 'endpointType' was not found in the resource id %q", input)
+			return resourceids.NewSegmentNotSpecifiedError(id, "endpointType", input)
 		}
 
 		endpointType, err := parseEndpointType(v)
 		if err != nil {
-			return nil, fmt.Errorf("parsing %q: %+v", v, err)
+			return fmt.Errorf("parsing %q: %+v", v, err)
 		}
 		id.EndpointType = *endpointType
 	}
 
-	if id.EndpointName, ok = parsed.Parsed["endpointName"]; !ok {
-		return nil, fmt.Errorf("the segment 'endpointName' was not found in the resource id %q", input)
+	if id.EndpointName, ok = input.Parsed["endpointName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "endpointName", input)
 	}
 
-	return &id, nil
+	return nil
 }
 
 // ValidateEndpointTypeID checks that 'input' can be parsed as a Endpoint Type ID
@@ -132,7 +117,7 @@ func ValidateEndpointTypeID(input interface{}, key string) (warnings []string, e
 // ID returns the formatted Endpoint Type ID
 func (id EndpointTypeId) ID() string {
 	fmtString := "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/trafficManagerProfiles/%s/%s/%s"
-	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.ProfileName, string(id.EndpointType), id.EndpointName)
+	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.TrafficManagerProfileName, string(id.EndpointType), id.EndpointName)
 }
 
 // Segments returns a slice of Resource ID Segments which comprise this Endpoint Type ID
@@ -145,7 +130,7 @@ func (id EndpointTypeId) Segments() []resourceids.Segment {
 		resourceids.StaticSegment("staticProviders", "providers", "providers"),
 		resourceids.ResourceProviderSegment("staticMicrosoftNetwork", "Microsoft.Network", "Microsoft.Network"),
 		resourceids.StaticSegment("staticTrafficManagerProfiles", "trafficManagerProfiles", "trafficManagerProfiles"),
-		resourceids.UserSpecifiedSegment("profileName", "profileValue"),
+		resourceids.UserSpecifiedSegment("trafficManagerProfileName", "trafficManagerProfileValue"),
 		resourceids.ConstantSegment("endpointType", PossibleValuesForEndpointType(), "AzureEndpoints"),
 		resourceids.UserSpecifiedSegment("endpointName", "endpointValue"),
 	}
@@ -156,7 +141,7 @@ func (id EndpointTypeId) String() string {
 	components := []string{
 		fmt.Sprintf("Subscription: %q", id.SubscriptionId),
 		fmt.Sprintf("Resource Group Name: %q", id.ResourceGroupName),
-		fmt.Sprintf("Profile Name: %q", id.ProfileName),
+		fmt.Sprintf("Traffic Manager Profile Name: %q", id.TrafficManagerProfileName),
 		fmt.Sprintf("Endpoint Type: %q", string(id.EndpointType)),
 		fmt.Sprintf("Endpoint Name: %q", id.EndpointName),
 	}

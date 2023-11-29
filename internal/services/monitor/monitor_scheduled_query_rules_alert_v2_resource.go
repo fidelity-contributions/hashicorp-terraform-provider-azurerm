@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package monitor
 
 import (
@@ -208,6 +211,7 @@ func (r ScheduledQueryRulesAlertV2Resource) Arguments() map[string]*pluginsdk.Sc
 			},
 		},
 
+		// lintignore:S013
 		"evaluation_frequency": {
 			Type: pluginsdk.TypeString,
 			// this field is required, missing this field will get an error from service
@@ -580,8 +584,6 @@ func (r ScheduledQueryRulesAlertV2Resource) Update() sdk.ResourceFunc {
 				}
 			}
 
-			model.SystemData = nil
-
 			if metadata.ResourceData.HasChange("tags") {
 				model.Tags = &resourceModel.Tags
 			}
@@ -621,7 +623,7 @@ func (r ScheduledQueryRulesAlertV2Resource) Read() sdk.ResourceFunc {
 			}
 
 			state := ScheduledQueryRulesAlertV2Model{
-				Name:              id.RuleName,
+				Name:              id.ScheduledQueryRuleName,
 				ResourceGroupName: id.ResourceGroupName,
 				Location:          location.Normalize(model.Location),
 			}

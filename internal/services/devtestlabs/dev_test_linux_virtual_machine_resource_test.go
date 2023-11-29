@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package devtestlabs_test
 
 import (
@@ -5,10 +8,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/go-azure-sdk/resource-manager/devtestlab/2018-09-15/virtualmachines"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance/check"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
-	"github.com/hashicorp/terraform-provider-azurerm/internal/services/devtestlabs/parse"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
 )
@@ -50,7 +53,7 @@ func TestAccDevTestLinuxVirtualMachine_requiresImport(t *testing.T) {
 		},
 		{
 			Config:      r.requiresImport(data),
-			ExpectError: acceptance.RequiresImportError("azurerm_dev_test_lab_linux_virtual_machine"),
+			ExpectError: acceptance.RequiresImportError("azurerm_dev_test_linux_virtual_machine"),
 		},
 	})
 }
@@ -103,44 +106,18 @@ func TestAccDevTestLinuxVirtualMachine_inboundNatRules(t *testing.T) {
 	})
 }
 
-func TestAccDevTestLinuxVirtualMachine_updateStorage(t *testing.T) {
-	data := acceptance.BuildTestData(t, "azurerm_dev_test_linux_virtual_machine", "test")
-	r := DevTestLinuxVirtualMachineResource{}
-
-	data.ResourceTest(t, r, []acceptance.TestStep{
-		{
-			Config: r.storage(data, "Standard"),
-			Check: acceptance.ComposeTestCheckFunc(
-				check.That(data.ResourceName).ExistsInAzure(r),
-				check.That(data.ResourceName).Key("gallery_image_reference.0.publisher").HasValue("Canonical"),
-				check.That(data.ResourceName).Key("storage_type").HasValue("Standard"),
-				check.That(data.ResourceName).Key("tags.%").HasValue("0"),
-			),
-		},
-		{
-			Config: r.storage(data, "Premium"),
-			Check: acceptance.ComposeTestCheckFunc(
-				check.That(data.ResourceName).ExistsInAzure(r),
-				check.That(data.ResourceName).Key("gallery_image_reference.0.publisher").HasValue("Canonical"),
-				check.That(data.ResourceName).Key("storage_type").HasValue("Premium"),
-				check.That(data.ResourceName).Key("tags.%").HasValue("0"),
-			),
-		},
-	})
-}
-
 func (DevTestLinuxVirtualMachineResource) Exists(ctx context.Context, clients *clients.Client, state *pluginsdk.InstanceState) (*bool, error) {
-	id, err := parse.DevTestVirtualMachineID(state.ID)
+	id, err := virtualmachines.ParseVirtualMachineID(state.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := clients.DevTestLabs.VirtualMachinesClient.Get(ctx, id.ResourceGroup, id.LabName, id.VirtualMachineName, "")
+	resp, err := clients.DevTestLabs.VirtualMachinesClient.Get(ctx, *id, virtualmachines.GetOperationOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("retrieving %s: %v", *id, err)
 	}
 
-	return utils.Bool(resp.LabVirtualMachineProperties != nil), nil
+	return utils.Bool(resp.Model != nil), nil
 }
 
 func (DevTestLinuxVirtualMachineResource) basic(data acceptance.TestData) string {
@@ -161,9 +138,9 @@ resource "azurerm_dev_test_linux_virtual_machine" "test" {
   storage_type           = "Standard"
 
   gallery_image_reference {
-    offer     = "UbuntuServer"
     publisher = "Canonical"
-    sku       = "18.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
   }
 }
@@ -188,9 +165,9 @@ resource "azurerm_dev_test_linux_virtual_machine" "import" {
   storage_type           = "Standard"
 
   gallery_image_reference {
-    offer     = "UbuntuServer"
     publisher = "Canonical"
-    sku       = "18.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
   }
 }
@@ -215,9 +192,9 @@ resource "azurerm_dev_test_linux_virtual_machine" "test" {
   storage_type           = "Standard"
 
   gallery_image_reference {
-    offer     = "UbuntuServer"
     publisher = "Canonical"
-    sku       = "18.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
   }
 }
@@ -243,9 +220,9 @@ resource "azurerm_dev_test_linux_virtual_machine" "test" {
   storage_type               = "Standard"
 
   gallery_image_reference {
-    offer     = "UbuntuServer"
     publisher = "Canonical"
-    sku       = "18.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
   }
 
@@ -264,33 +241,6 @@ resource "azurerm_dev_test_linux_virtual_machine" "test" {
   }
 }
 `, template, data.RandomInteger)
-}
-
-func (DevTestLinuxVirtualMachineResource) storage(data acceptance.TestData, storageType string) string {
-	template := DevTestLinuxVirtualMachineResource{}.template(data)
-	return fmt.Sprintf(`
-%s
-
-resource "azurerm_dev_test_linux_virtual_machine" "test" {
-  name                   = "acctestvm-vm%d"
-  lab_name               = azurerm_dev_test_lab.test.name
-  resource_group_name    = azurerm_resource_group.test.name
-  location               = azurerm_resource_group.test.location
-  size                   = "Standard_B1ms"
-  username               = "acct5stU5er"
-  password               = "Pa$w0rd1234!"
-  lab_virtual_network_id = azurerm_dev_test_virtual_network.test.id
-  lab_subnet_name        = azurerm_dev_test_virtual_network.test.subnet[0].name
-  storage_type           = "%s"
-
-  gallery_image_reference {
-    offer     = "UbuntuServer"
-    publisher = "Canonical"
-    sku       = "18.04-LTS"
-    version   = "latest"
-  }
-}
-`, template, data.RandomInteger, storageType)
 }
 
 func (DevTestLinuxVirtualMachineResource) template(data acceptance.TestData) string {

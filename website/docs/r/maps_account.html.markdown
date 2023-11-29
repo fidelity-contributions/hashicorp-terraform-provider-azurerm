@@ -19,9 +19,10 @@ resource "azurerm_resource_group" "example" {
 }
 
 resource "azurerm_maps_account" "example" {
-  name                = "example-maps-account"
-  resource_group_name = azurerm_resource_group.example.name
-  sku_name            = "S1"
+  name                         = "example-maps-account"
+  resource_group_name          = azurerm_resource_group.example.name
+  sku_name                     = "S1"
+  local_authentication_enabled = true
 
   tags = {
     environment = "Test"
@@ -39,11 +40,15 @@ The following arguments are supported:
 
 * `sku_name` - (Required) The SKU of the Azure Maps Account. Possible values are `S0`, `S1` and `G2`. Changing this forces a new resource to be created.
 
+~> **Note:** Gen1 SKUs (`S0` and `S1`) are deprecated and can no longer be used for new deployments, which should instead use a Gen2 SKU (`G2`) - more information can be found [in the Azure documentation](https://learn.microsoft.com/azure/azure-maps/how-to-manage-pricing-tier).
+
+* `local_authentication_enabled` - (Optional) Is local authentication enabled for this Azure Maps Account? When `false`, all authentication to the Azure Maps data-plane REST API is disabled, except Azure AD authentication. Defaults to `true`.
+
 * `tags` - (Optional) A mapping of tags to assign to the Azure Maps Account.
 
 ## Attributes Reference
 
-In addition to all arguments above, the following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Azure Maps Account.
 

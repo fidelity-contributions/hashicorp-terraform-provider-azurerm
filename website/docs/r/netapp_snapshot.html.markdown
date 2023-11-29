@@ -64,7 +64,7 @@ resource "azurerm_netapp_volume" "example" {
   pool_name           = azurerm_netapp_pool.example.name
   volume_path         = "my-unique-file-path"
   service_level       = "Premium"
-  subnet_id           = azurerm_subnet.test.id
+  subnet_id           = azurerm_subnet.example.id
   storage_quota_in_gb = "100"
 }
 
@@ -98,7 +98,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the NetApp Snapshot.
 
@@ -107,7 +107,6 @@ The following attributes are exported:
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/language/resources/syntax#operation-timeouts) for certain actions:
 
 * `create` - (Defaults to 30 minutes) Used when creating the NetApp Snapshot.
-* `update` - (Defaults to 30 minutes) Used when updating the NetApp Snapshot.
 * `read` - (Defaults to 5 minutes) Used when retrieving the NetApp Snapshot.
 * `delete` - (Defaults to 30 minutes) Used when deleting the NetApp Snapshot.
 

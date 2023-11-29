@@ -97,7 +97,7 @@ resource "azurerm_key_vault_access_policy" "deployer" {
   object_id    = data.azurerm_client_config.current.object_id
 
   key_permissions = [
-    "Create", "Get", "Delete", "Purge"
+    "Create", "Get", "Delete", "Purge", "GetRotationPolicy"
   ]
 }
 
@@ -183,6 +183,8 @@ The following arguments are supported:
 
 * `sql_administrator_login_password` - (Optional) The Password associated with the `sql_administrator_login` for the SQL administrator. If this is not provided `aad_admin` or `customer_managed_key` must be provided.
 
+* `azuread_authentication_only` - (Optional) Is Azure Active Directory Authentication the only way to authenticate with resources inside this synapse Workspace. Defaults to `false`.
+
 ---
 
 * `aad_admin` - (Optional) An `aad_admin` block as defined below. Conflicts with `customer_managed_key`.
@@ -201,7 +203,7 @@ The following arguments are supported:
 
 * `managed_resource_group_name` - (Optional) Workspace managed resource group. Changing this forces a new resource to be created.
 
-* `managed_virtual_network_enabled` - (Optional) Is Virtual Network enabled for all computes in this workspace?  Changing this forces a new resource to be created.
+* `managed_virtual_network_enabled` - (Optional) Is Virtual Network enabled for all computes in this workspace? Changing this forces a new resource to be created.
 
 * `public_network_access_enabled` - (Optional) Whether public network access is allowed for the Cognitive Account. Defaults to `true`.
 

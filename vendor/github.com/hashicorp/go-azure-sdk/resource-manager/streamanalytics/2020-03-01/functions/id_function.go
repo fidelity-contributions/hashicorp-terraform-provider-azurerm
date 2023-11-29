@@ -7,22 +7,25 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = FunctionId{}
 
 // FunctionId is a struct representing the Resource ID for a Function
 type FunctionId struct {
 	SubscriptionId    string
 	ResourceGroupName string
-	JobName           string
+	StreamingJobName  string
 	FunctionName      string
 }
 
 // NewFunctionID returns a new FunctionId struct
-func NewFunctionID(subscriptionId string, resourceGroupName string, jobName string, functionName string) FunctionId {
+func NewFunctionID(subscriptionId string, resourceGroupName string, streamingJobName string, functionName string) FunctionId {
 	return FunctionId{
 		SubscriptionId:    subscriptionId,
 		ResourceGroupName: resourceGroupName,
-		JobName:           jobName,
+		StreamingJobName:  streamingJobName,
 		FunctionName:      functionName,
 	}
 }
@@ -35,23 +38,9 @@ func ParseFunctionID(input string) (*FunctionId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := FunctionId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.JobName, ok = parsed.Parsed["jobName"]; !ok {
-		return nil, fmt.Errorf("the segment 'jobName' was not found in the resource id %q", input)
-	}
-
-	if id.FunctionName, ok = parsed.Parsed["functionName"]; !ok {
-		return nil, fmt.Errorf("the segment 'functionName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -66,26 +55,34 @@ func ParseFunctionIDInsensitively(input string) (*FunctionId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := FunctionId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.JobName, ok = parsed.Parsed["jobName"]; !ok {
-		return nil, fmt.Errorf("the segment 'jobName' was not found in the resource id %q", input)
-	}
-
-	if id.FunctionName, ok = parsed.Parsed["functionName"]; !ok {
-		return nil, fmt.Errorf("the segment 'functionName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *FunctionId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.ResourceGroupName, ok = input.Parsed["resourceGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroupName", input)
+	}
+
+	if id.StreamingJobName, ok = input.Parsed["streamingJobName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "streamingJobName", input)
+	}
+
+	if id.FunctionName, ok = input.Parsed["functionName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "functionName", input)
+	}
+
+	return nil
 }
 
 // ValidateFunctionID checks that 'input' can be parsed as a Function ID
@@ -106,7 +103,7 @@ func ValidateFunctionID(input interface{}, key string) (warnings []string, error
 // ID returns the formatted Function ID
 func (id FunctionId) ID() string {
 	fmtString := "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.StreamAnalytics/streamingJobs/%s/functions/%s"
-	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.JobName, id.FunctionName)
+	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.StreamingJobName, id.FunctionName)
 }
 
 // Segments returns a slice of Resource ID Segments which comprise this Function ID
@@ -119,7 +116,7 @@ func (id FunctionId) Segments() []resourceids.Segment {
 		resourceids.StaticSegment("staticProviders", "providers", "providers"),
 		resourceids.ResourceProviderSegment("staticMicrosoftStreamAnalytics", "Microsoft.StreamAnalytics", "Microsoft.StreamAnalytics"),
 		resourceids.StaticSegment("staticStreamingJobs", "streamingJobs", "streamingJobs"),
-		resourceids.UserSpecifiedSegment("jobName", "jobValue"),
+		resourceids.UserSpecifiedSegment("streamingJobName", "streamingJobValue"),
 		resourceids.StaticSegment("staticFunctions", "functions", "functions"),
 		resourceids.UserSpecifiedSegment("functionName", "functionValue"),
 	}
@@ -130,7 +127,7 @@ func (id FunctionId) String() string {
 	components := []string{
 		fmt.Sprintf("Subscription: %q", id.SubscriptionId),
 		fmt.Sprintf("Resource Group Name: %q", id.ResourceGroupName),
-		fmt.Sprintf("Job Name: %q", id.JobName),
+		fmt.Sprintf("Streaming Job Name: %q", id.StreamingJobName),
 		fmt.Sprintf("Function Name: %q", id.FunctionName),
 	}
 	return fmt.Sprintf("Function (%s)", strings.Join(components, "\n"))

@@ -31,7 +31,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following arguments are supported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 - `default_function_key` - Function App resource's default function key.
 
@@ -44,3 +44,5 @@ The following arguments are supported:
 - `durabletask_extension_key` - Function App resource's Durable Task Extension system key.
 
 - `webpubsub_extension_key` - Function App resource's Web PubSub Extension system key.
+
+- `blobs_extension_key` - Function App resource's Blobs Extension system key.

@@ -1,11 +1,14 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package dataprotection
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"time"
 
+	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 	"github.com/hashicorp/go-azure-helpers/lang/response"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonschema"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/identity"
@@ -25,11 +28,6 @@ func dataSourceDataProtectionBackupVault() *pluginsdk.Resource {
 		Timeouts: &pluginsdk.ResourceTimeout{
 			Read: pluginsdk.DefaultTimeout(5 * time.Minute),
 		},
-
-		Importer: pluginsdk.ImporterValidatingResourceId(func(id string) error {
-			_, err := backupvaults.ParseBackupVaultID(id)
-			return err
-		}),
 
 		Schema: map[string]*pluginsdk.Schema{
 			"name": {
@@ -76,15 +74,13 @@ func dataSourceDataProtectionBackupVaultRead(d *pluginsdk.ResourceData, meta int
 	resp, err := client.Get(ctx, id)
 	if err != nil {
 		if response.WasNotFound(resp.HttpResponse) {
-			log.Printf("[INFO] DataProtection BackupVault %q does not exist - removing from state", d.Id())
-			d.SetId("")
-			return nil
+			return fmt.Errorf("%s was not found", id)
 		}
 		return fmt.Errorf("retrieving DataProtection BackupVault (%q): %+v", id, err)
 	}
 
 	d.SetId(id.ID())
-	d.Set("name", id.VaultName)
+	d.Set("name", id.BackupVaultName)
 	d.Set("resource_group_name", id.ResourceGroupName)
 
 	if model := resp.Model; model != nil {
@@ -92,8 +88,8 @@ func dataSourceDataProtectionBackupVaultRead(d *pluginsdk.ResourceData, meta int
 
 		props := model.Properties
 		if props.StorageSettings != nil && len(props.StorageSettings) > 0 {
-			d.Set("datastore_type", (props.StorageSettings)[0].DatastoreType)
-			d.Set("redundancy", (props.StorageSettings)[0].Type)
+			d.Set("datastore_type", string(pointer.From((props.StorageSettings)[0].DatastoreType)))
+			d.Set("redundancy", string(pointer.From((props.StorageSettings)[0].Type)))
 		}
 
 		if err = d.Set("identity", dataSourceFlattenBackupVaultDppIdentityDetails(model.Identity)); err != nil {

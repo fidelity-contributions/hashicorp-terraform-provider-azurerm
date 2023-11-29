@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 import (
@@ -172,20 +175,6 @@ func schemaFeatures(supportLegacyTestSuite bool) *pluginsdk.Schema {
 			},
 		},
 
-		"network": {
-			Type:     pluginsdk.TypeList,
-			Optional: true,
-			MaxItems: 1,
-			Elem: &pluginsdk.Resource{
-				Schema: map[string]*pluginsdk.Schema{
-					"relaxed_locking": {
-						Type:     pluginsdk.TypeBool,
-						Required: true,
-					},
-				},
-			},
-		},
-
 		"template_deployment": {
 			Type:     pluginsdk.TypeList,
 			Optional: true,
@@ -239,7 +228,8 @@ func schemaFeatures(supportLegacyTestSuite bool) *pluginsdk.Schema {
 					},
 					"roll_instances_when_required": {
 						Type:     pluginsdk.TypeBool,
-						Required: true,
+						Optional: true,
+						Default:  true,
 					},
 					"scale_to_zero_before_deletion": {
 						Type:     pluginsdk.TypeBool,
@@ -275,6 +265,21 @@ func schemaFeatures(supportLegacyTestSuite bool) *pluginsdk.Schema {
 						Type:     pluginsdk.TypeBool,
 						Optional: true,
 						Default:  true,
+					},
+				},
+			},
+		},
+
+		"subscription": {
+			Type:     pluginsdk.TypeList,
+			Optional: true,
+			MaxItems: 1,
+			Elem: &pluginsdk.Resource{
+				Schema: map[string]*pluginsdk.Schema{
+					"prevent_cancellation_on_destroy": {
+						Type:     pluginsdk.TypeBool,
+						Optional: true,
+						Default:  false,
 					},
 				},
 			},
@@ -462,6 +467,16 @@ func expandFeatures(input []interface{}) features.UserFeatures {
 			managedDiskRaw := items[0].(map[string]interface{})
 			if v, ok := managedDiskRaw["expand_without_downtime"]; ok {
 				featuresMap.ManagedDisk.ExpandWithoutDowntime = v.(bool)
+			}
+		}
+	}
+
+	if raw, ok := val["subscription"]; ok {
+		items := raw.([]interface{})
+		if len(items) > 0 {
+			subscriptionRaw := items[0].(map[string]interface{})
+			if v, ok := subscriptionRaw["prevent_cancellation_on_destroy"]; ok {
+				featuresMap.Subscription.PreventCancellationOnDestroy = v.(bool)
 			}
 		}
 	}

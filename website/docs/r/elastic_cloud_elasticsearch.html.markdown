@@ -22,7 +22,7 @@ resource "azurerm_elastic_cloud_elasticsearch" "test" {
   name                        = "example-elasticsearch"
   resource_group_name         = azurerm_resource_group.test.name
   location                    = azurerm_resource_group.test.location
-  sku_name                    = "ess-monthly-consumption_Monthly"
+  sku_name                    = "ess-consumption-2024_Monthly"
   elastic_cloud_email_address = "user@example.com"
 }
 ```
@@ -41,6 +41,10 @@ The following arguments are supported:
 
 * `sku_name` - (Required) Specifies the name of the SKU for this Elasticsearch. Changing this forces a new Elasticsearch to be created.
 
+-> **NOTE:** The SKU depends on the Elasticsearch Plans available for your account and is a combination of PlanID_Term.
+Ex: If the plan ID is "planXYZ" and term is "Yearly", the SKU will be "planXYZ_Yearly".
+You may find your eligible plans [here](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/elastic.ec-azure-pp) or in the online documentation [here](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/elastic.ec-azure-pp?tab=PlansAndPrice) for more details or in case of any issues with the SKU.
+
 ---
 
 * `logs` - (Optional) A `logs` block as defined below.
@@ -55,7 +59,7 @@ The `filtering_tag` block supports the following:
 
 * `action` - (Required) Specifies the type of action which should be taken when the Tag matches the `name` and `value`. Possible values are `Exclude` and `Include`.
 
-* `name` - (Required) Specifies the name (key) of the Tag which should be filtered. Changing this forces a new resource to be created.
+* `name` - (Required) Specifies the name (key) of the Tag which should be filtered.
 
 * `value` - (Required) Specifies the value of the Tag which should be filtered.
 

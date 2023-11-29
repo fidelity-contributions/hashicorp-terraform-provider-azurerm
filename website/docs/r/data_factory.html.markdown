@@ -37,7 +37,7 @@ The following arguments are supported:
 
 * `github_configuration` - (Optional) A `github_configuration` block as defined below.
 
-* `global_parameter` - (Optional)  A list of `global_parameter` blocks as defined above.
+* `global_parameter` - (Optional) A list of `global_parameter` blocks as defined above.
 
 * `identity` - (Optional) An `identity` block as defined below.
 
@@ -47,7 +47,7 @@ The following arguments are supported:
 
 * `public_network_enabled` - (Optional) Is the Data Factory visible to the public network? Defaults to `true`.
 
-* `customer_managed_key_id` -  (Optional) Specifies the Azure Key Vault Key ID to be used as the Customer Managed Key (CMK) for double encryption. Required with user assigned identity.
+* `customer_managed_key_id` - (Optional) Specifies the Azure Key Vault Key ID to be used as the Customer Managed Key (CMK) for double encryption. Required with user assigned identity.
 
 * `customer_managed_key_identity_id` - (Optional) Specifies the ID of the user assigned identity associated with the Customer Managed Key. Must be supplied if `customer_managed_key_id` is set.
 
@@ -68,6 +68,8 @@ A `github_configuration` block supports the following:
 * `repository_name` - (Required) Specifies the name of the git repository.
 
 * `root_folder` - (Required) Specifies the root folder within the repository. Set to `/` for the top level.
+
+* `publishing_enabled` - (Optional) Is automated publishing enabled? Defaults to `true`.
 
 -> **Note:** You must log in to the Data Factory management UI to complete the authentication to the GitHub repository.
 
@@ -109,9 +111,11 @@ A `vsts_configuration` block supports the following:
 
 * `tenant_id` - (Required) Specifies the Tenant ID associated with the VSTS account.
 
+* `publishing_enabled` - (Optional) Is automated publishing enabled? Defaults to `true`.
+
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Data Factory.
 

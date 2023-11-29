@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package network_test
 
 import (
@@ -5,10 +8,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/go-azure-helpers/lang/response"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/network/2023-06-01/networkmanagerconnections"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance/check"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
-	"github.com/hashicorp/terraform-provider-azurerm/internal/services/network/parse"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
 )
@@ -79,20 +83,20 @@ func testAccNetworkSubscriptionNetworkManagerConnection_update(t *testing.T) {
 }
 
 func (r ManagerSubscriptionConnectionResource) Exists(ctx context.Context, clients *clients.Client, state *pluginsdk.InstanceState) (*bool, error) {
-	id, err := parse.NetworkManagerSubscriptionConnectionID(state.ID)
+	id, err := networkmanagerconnections.ParseNetworkManagerConnectionID(state.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	client := clients.Network.ManagerSubscriptionConnectionsClient
-	resp, err := client.Get(ctx, id.NetworkManagerConnectionName)
+	client := clients.Network.NetworkManagerConnections
+	resp, err := client.SubscriptionNetworkManagerConnectionsGet(ctx, *id)
 	if err != nil {
-		if utils.ResponseWasNotFound(resp.Response) {
+		if response.WasNotFound(resp.HttpResponse) {
 			return utils.Bool(false), nil
 		}
 		return nil, fmt.Errorf("retrieving %s: %+v", id, err)
 	}
-	return utils.Bool(resp.ManagerConnectionProperties != nil), nil
+	return utils.Bool(resp.Model != nil), nil
 }
 
 func (r ManagerSubscriptionConnectionResource) template(data acceptance.TestData) string {
@@ -102,7 +106,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "test" {
-  name     = "acctestRG-nm-%d"
+  name     = "acctestRG-network-manager-%d"
   location = "%s"
 }
 
@@ -124,7 +128,7 @@ resource "azurerm_network_manager" "test" {
 func (r ManagerSubscriptionConnectionResource) basic(data acceptance.TestData) string {
 	template := r.template(data)
 	return fmt.Sprintf(`
-				%s
+%s
 
 resource "azurerm_network_manager_subscription_connection" "test" {
   name               = "acctest-nmsc-%d"
@@ -137,7 +141,7 @@ resource "azurerm_network_manager_subscription_connection" "test" {
 func (r ManagerSubscriptionConnectionResource) requiresImport(data acceptance.TestData) string {
 	config := r.basic(data)
 	return fmt.Sprintf(`
-			%s
+%s
 
 resource "azurerm_network_manager_subscription_connection" "import" {
   name               = "acctest-nmsc-%d"
@@ -150,7 +154,7 @@ resource "azurerm_network_manager_subscription_connection" "import" {
 func (r ManagerSubscriptionConnectionResource) complete(data acceptance.TestData) string {
 	template := r.template(data)
 	return fmt.Sprintf(`
-			%s
+%s
 
 resource "azurerm_network_manager_subscription_connection" "test" {
   name               = "acctest-nmsc-%d"
@@ -164,7 +168,7 @@ resource "azurerm_network_manager_subscription_connection" "test" {
 func (r ManagerSubscriptionConnectionResource) update(data acceptance.TestData) string {
 	template := r.template(data)
 	return fmt.Sprintf(`
-			%s
+%s
 
 resource "azurerm_network_manager_subscription_connection" "test" {
   name               = "acctest-nmsc-%d"

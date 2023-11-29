@@ -39,15 +39,15 @@ resource "azurerm_api_management_product" "example" {
 }
 
 resource "azurerm_api_management_tag" "example" {
-  api_management_id = data.azurerm_api_management.example.id
+  api_management_id = azurerm_api_management.example.id
   name              = "example-tag"
 }
 
 resource "azurerm_api_management_product_tag" "example" {
   api_management_product_id = azurerm_api_management_product.example.product_id
-  api_management_name       = data.azurerm_api_management.example.name
-  resource_group_name       = data.azurerm_resource_group.example.name
-  name                      = azurerm_api_management_tag.example1.name
+  api_management_name       = azurerm_api_management.example.name
+  resource_group_name       = azurerm_resource_group.example.name
+  name                      = azurerm_api_management_tag.example.name
 }
 ```
 
@@ -65,7 +65,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-In addition to all arguments above, the following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the API Management Product.
 
@@ -75,7 +75,6 @@ The `timeouts` block allows you to
 specify [timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) for certain actions:
 
 * `create` - (Defaults to 30 minutes) Used when creating the API Management Product.
-* `update` - (Defaults to 30 minutes) Used when updating the API Management Product.
 * `read` - (Defaults to 5 minutes) Used when retrieving the API Management Product.
 * `delete` - (Defaults to 30 minutes) Used when deleting the API Management Product.
 

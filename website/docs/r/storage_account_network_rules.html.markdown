@@ -69,7 +69,7 @@ The following arguments are supported:
 
 * `default_action` - (Required) Specifies the default action of allow or deny when no other rules match. Valid options are `Deny` or `Allow`.
 
-* `bypass` - (Optional)  Specifies whether traffic is bypassed for Logging/Metrics/AzureServices. Valid options are any combination of `Logging`, `Metrics`, `AzureServices`, or `None`.
+* `bypass` - (Optional) Specifies whether traffic is bypassed for Logging/Metrics/AzureServices. Valid options are any combination of `Logging`, `Metrics`, `AzureServices`, or `None`.
 
 -> **NOTE** User has to explicitly set `bypass` to empty slice (`[]`) to remove it.
 
@@ -81,11 +81,11 @@ The following arguments are supported:
 
 -> **NOTE** User has to explicitly set `ip_rules` to empty slice (`[]`) to remove it.
 
-* `virtual_network_subnet_ids` - (Optional) A list of virtual network subnet ids to to secure the storage account.
+* `virtual_network_subnet_ids` - (Optional) A list of virtual network subnet ids to secure the storage account.
 
 -> **NOTE** User has to explicitly set `virtual_network_subnet_ids` to empty slice (`[]`) to remove it.
 
-* `private_link_access` - (Optional) One or More `private_link_access` block as defined below.
+* `private_link_access` - (Optional) One or more `private_link_access` block as defined below.
 
 ---
 
@@ -97,7 +97,7 @@ A `private_link_access` block supports the following:
 
 ## Attributes Reference
 
-The following attributes are exported in addition to the arguments listed above:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Storage Account.
 

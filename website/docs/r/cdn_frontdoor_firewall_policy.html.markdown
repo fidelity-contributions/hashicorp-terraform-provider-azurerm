@@ -243,9 +243,11 @@ An `exclusion` block supports the following:
 
 * `selector` - (Required) Selector for the value in the `match_variable` attribute this exclusion applies to.
 
+-> **NOTE:** `selector` must be set to `*` if `operator` is set to `EqualsAny`.
+
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Front Door Firewall Policy.
 
@@ -265,5 +267,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 Front Door Firewall Policies can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import azurerm_cdn_frontdoor_firewall_policy.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup1/providers/Microsoft.Network/frontdoorWebApplicationFirewallPolicies/firewallPolicy1
+terraform import azurerm_cdn_frontdoor_firewall_policy.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resourceGroup1/providers/Microsoft.Network/frontDoorWebApplicationFirewallPolicies/firewallPolicy1
 ```

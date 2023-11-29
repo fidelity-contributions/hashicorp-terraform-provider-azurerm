@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package bot_test
 
 import (
@@ -5,13 +8,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/services/preview/botservice/mgmt/2021-05-01-preview/botservice" // nolint: staticcheck
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance/check"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/bot/parse"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
+	"github.com/tombuildsstuff/kermit/sdk/botservice/2021-05-01-preview/botservice"
 )
 
 type BotChannelMsTeamsResource struct{}
@@ -91,11 +94,12 @@ func (BotChannelMsTeamsResource) basicUpdate(data acceptance.TestData) string {
 %s
 
 resource "azurerm_bot_channel_ms_teams" "test" {
-  bot_name            = azurerm_bot_channels_registration.test.name
-  location            = azurerm_bot_channels_registration.test.location
-  resource_group_name = azurerm_resource_group.test.name
-  calling_web_hook    = "https://example.com/"
-  enable_calling      = true
+  bot_name               = azurerm_bot_channels_registration.test.name
+  location               = azurerm_bot_channels_registration.test.location
+  resource_group_name    = azurerm_resource_group.test.name
+  calling_web_hook       = "https://example.com/"
+  enable_calling         = true
+  deployment_environment = "CommercialDeployment"
 }
 `, BotChannelsRegistrationResource{}.basicConfig(data))
 }

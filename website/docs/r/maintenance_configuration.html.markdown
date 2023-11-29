@@ -46,7 +46,7 @@ The following arguments are supported:
 
 * `scope` - (Required) The scope of the Maintenance Configuration. Possible values are `Extension`, `Host`, `InGuestPatch`, `OSImage`, `SQLDB` or `SQLManagedInstance`.
 
-* `visibility` - (Optional) The visibility of the Maintenance Configuration. The only allowable value is `Custom`.
+* `visibility` - (Optional) The visibility of the Maintenance Configuration. The only allowable value is `Custom`. Defaults to `Custom`.
 
 * `window` - (Optional) A `window` block as defined below.
 
@@ -100,15 +100,15 @@ A `windows` block supports:
 
 * `classifications_to_include` - (Optional) List of Classification category of patches to be patched. Possible values are `Critical`, `Security`, `UpdateRollup`, `FeaturePack`, `ServicePack`, `Definition`, `Tools` and `Updates`.
 
-* `kb_numbers_to_exclude` (Optional) List of KB numbers to be excluded from patching.
+* `kb_numbers_to_exclude` - (Optional) List of KB numbers to be excluded from patching.
 
-* `kb_numbers_to_include` (Optional) List of KB numbers to be included for patching.
+* `kb_numbers_to_include` - (Optional) List of KB numbers to be included for patching.
 
 ---
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Maintenance Configuration.
 
@@ -126,5 +126,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/l
 Maintenance Configuration can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import azurerm_maintenance_configuration.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/microsoft.maintenance/maintenanceconfigurations/example-mc
+terraform import azurerm_maintenance_configuration.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Maintenance/maintenanceConfigurations/example-mc
 ```

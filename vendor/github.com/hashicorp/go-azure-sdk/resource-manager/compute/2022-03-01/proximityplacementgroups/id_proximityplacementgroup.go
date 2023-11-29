@@ -7,6 +7,9 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = ProximityPlacementGroupId{}
 
 // ProximityPlacementGroupId is a struct representing the Resource ID for a Proximity Placement Group
@@ -33,19 +36,9 @@ func ParseProximityPlacementGroupID(input string) (*ProximityPlacementGroupId, e
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := ProximityPlacementGroupId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.ProximityPlacementGroupName, ok = parsed.Parsed["proximityPlacementGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'proximityPlacementGroupName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -60,22 +53,30 @@ func ParseProximityPlacementGroupIDInsensitively(input string) (*ProximityPlacem
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := ProximityPlacementGroupId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.ProximityPlacementGroupName, ok = parsed.Parsed["proximityPlacementGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'proximityPlacementGroupName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *ProximityPlacementGroupId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.ResourceGroupName, ok = input.Parsed["resourceGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroupName", input)
+	}
+
+	if id.ProximityPlacementGroupName, ok = input.Parsed["proximityPlacementGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "proximityPlacementGroupName", input)
+	}
+
+	return nil
 }
 
 // ValidateProximityPlacementGroupID checks that 'input' can be parsed as a Proximity Placement Group ID

@@ -1,7 +1,10 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package pluginsdk
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -22,8 +25,8 @@ type (
 )
 
 type (
-	StateChangeConf  = resource.StateChangeConf
-	StateRefreshFunc = resource.StateRefreshFunc
+	StateChangeConf  = retry.StateChangeConf
+	StateRefreshFunc = retry.StateRefreshFunc
 )
 
 type (

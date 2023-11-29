@@ -7,22 +7,25 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = StreamingLocatorId{}
 
 // StreamingLocatorId is a struct representing the Resource ID for a Streaming Locator
 type StreamingLocatorId struct {
 	SubscriptionId       string
 	ResourceGroupName    string
-	AccountName          string
+	MediaServiceName     string
 	StreamingLocatorName string
 }
 
 // NewStreamingLocatorID returns a new StreamingLocatorId struct
-func NewStreamingLocatorID(subscriptionId string, resourceGroupName string, accountName string, streamingLocatorName string) StreamingLocatorId {
+func NewStreamingLocatorID(subscriptionId string, resourceGroupName string, mediaServiceName string, streamingLocatorName string) StreamingLocatorId {
 	return StreamingLocatorId{
 		SubscriptionId:       subscriptionId,
 		ResourceGroupName:    resourceGroupName,
-		AccountName:          accountName,
+		MediaServiceName:     mediaServiceName,
 		StreamingLocatorName: streamingLocatorName,
 	}
 }
@@ -35,23 +38,9 @@ func ParseStreamingLocatorID(input string) (*StreamingLocatorId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := StreamingLocatorId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.AccountName, ok = parsed.Parsed["accountName"]; !ok {
-		return nil, fmt.Errorf("the segment 'accountName' was not found in the resource id %q", input)
-	}
-
-	if id.StreamingLocatorName, ok = parsed.Parsed["streamingLocatorName"]; !ok {
-		return nil, fmt.Errorf("the segment 'streamingLocatorName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -66,26 +55,34 @@ func ParseStreamingLocatorIDInsensitively(input string) (*StreamingLocatorId, er
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := StreamingLocatorId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.AccountName, ok = parsed.Parsed["accountName"]; !ok {
-		return nil, fmt.Errorf("the segment 'accountName' was not found in the resource id %q", input)
-	}
-
-	if id.StreamingLocatorName, ok = parsed.Parsed["streamingLocatorName"]; !ok {
-		return nil, fmt.Errorf("the segment 'streamingLocatorName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *StreamingLocatorId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.ResourceGroupName, ok = input.Parsed["resourceGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroupName", input)
+	}
+
+	if id.MediaServiceName, ok = input.Parsed["mediaServiceName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "mediaServiceName", input)
+	}
+
+	if id.StreamingLocatorName, ok = input.Parsed["streamingLocatorName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "streamingLocatorName", input)
+	}
+
+	return nil
 }
 
 // ValidateStreamingLocatorID checks that 'input' can be parsed as a Streaming Locator ID
@@ -106,7 +103,7 @@ func ValidateStreamingLocatorID(input interface{}, key string) (warnings []strin
 // ID returns the formatted Streaming Locator ID
 func (id StreamingLocatorId) ID() string {
 	fmtString := "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Media/mediaServices/%s/streamingLocators/%s"
-	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.AccountName, id.StreamingLocatorName)
+	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.MediaServiceName, id.StreamingLocatorName)
 }
 
 // Segments returns a slice of Resource ID Segments which comprise this Streaming Locator ID
@@ -119,7 +116,7 @@ func (id StreamingLocatorId) Segments() []resourceids.Segment {
 		resourceids.StaticSegment("staticProviders", "providers", "providers"),
 		resourceids.ResourceProviderSegment("staticMicrosoftMedia", "Microsoft.Media", "Microsoft.Media"),
 		resourceids.StaticSegment("staticMediaServices", "mediaServices", "mediaServices"),
-		resourceids.UserSpecifiedSegment("accountName", "accountValue"),
+		resourceids.UserSpecifiedSegment("mediaServiceName", "mediaServiceValue"),
 		resourceids.StaticSegment("staticStreamingLocators", "streamingLocators", "streamingLocators"),
 		resourceids.UserSpecifiedSegment("streamingLocatorName", "streamingLocatorValue"),
 	}
@@ -130,7 +127,7 @@ func (id StreamingLocatorId) String() string {
 	components := []string{
 		fmt.Sprintf("Subscription: %q", id.SubscriptionId),
 		fmt.Sprintf("Resource Group Name: %q", id.ResourceGroupName),
-		fmt.Sprintf("Account Name: %q", id.AccountName),
+		fmt.Sprintf("Media Service Name: %q", id.MediaServiceName),
 		fmt.Sprintf("Streaming Locator Name: %q", id.StreamingLocatorName),
 	}
 	return fmt.Sprintf("Streaming Locator (%s)", strings.Join(components, "\n"))

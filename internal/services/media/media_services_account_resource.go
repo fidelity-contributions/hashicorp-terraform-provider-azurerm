@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package media
 
 import (
@@ -15,7 +18,6 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/location"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/tags"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/media/2021-11-01/accounts"
-	"github.com/hashicorp/go-azure-sdk/resource-manager/storage/2022-05-01/storageaccounts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/tf"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
@@ -32,6 +34,8 @@ func resourceMediaServicesAccount() *pluginsdk.Resource {
 		Read:   resourceMediaServicesAccountRead,
 		Update: resourceMediaServicesAccountCreateUpdate,
 		Delete: resourceMediaServicesAccountDelete,
+
+		DeprecationMessage: azureMediaRetirementMessage,
 
 		Timeouts: &pluginsdk.ResourceTimeout{
 			Create: pluginsdk.DefaultTimeout(30 * time.Minute),
@@ -73,7 +77,7 @@ func resourceMediaServicesAccount() *pluginsdk.Resource {
 						"id": {
 							Type:         pluginsdk.TypeString,
 							Required:     true,
-							ValidateFunc: storageaccounts.ValidateStorageAccountID,
+							ValidateFunc: commonids.ValidateStorageAccountID,
 						},
 
 						"is_primary": {
@@ -261,7 +265,7 @@ func resourceMediaServicesAccountRead(d *pluginsdk.ResourceData, meta interface{
 		return fmt.Errorf("retrieving %s: %+v", *id, err)
 	}
 
-	d.Set("name", id.AccountName)
+	d.Set("name", id.MediaServiceName)
 	d.Set("resource_group_name", id.ResourceGroupName)
 
 	if model := resp.Model; model != nil {
@@ -394,7 +398,7 @@ func flattenMediaServicesAccountStorageAccounts(input *[]accounts.StorageAccount
 	for _, storageAccount := range *input {
 		storageAccountId := ""
 		if storageAccount.Id != nil {
-			id, err := storageaccounts.ParseStorageAccountIDInsensitively(*storageAccount.Id)
+			id, err := commonids.ParseStorageAccountIDInsensitively(*storageAccount.Id)
 			if err != nil {
 				return nil, fmt.Errorf("parsing %q as a Storage Account ID: %+v", *storageAccount.Id, err)
 			}
@@ -523,7 +527,7 @@ func flattenMediaServicesAccountIdentity(input *accounts.MediaServiceIdentity) (
 }
 
 func expandMediaServicesAccountKeyDelivery(input []interface{}) *accounts.KeyDelivery {
-	if len(input) == 0 {
+	if len(input) == 0 || input[0] == nil {
 		return nil
 	}
 

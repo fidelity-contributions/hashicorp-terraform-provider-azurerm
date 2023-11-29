@@ -70,11 +70,15 @@ The following supported locations for a Parquet Dataset:
 
 * `http_server_location` - (Optional) A `http_server_location` block as defined below.
 
+* `azure_blob_fs_location` - (Optional) A `azure_blob_fs_location` block as defined below.
+
 * `azure_blob_storage_location` - (Optional) A `azure_blob_storage_location` block as defined below.
 
 The following supported arguments are specific to Parquet Dataset:
 
-* `compression_codec` - (Optional) The compression codec used to read/write text files. Valid values are `bzip2`, `gzip`, `deflate`, `ZipDeflate`, `TarGzip`, `Tar`, `snappy`, or `lz4`. Please note these values are case sensitive.
+* `compression_codec` - (Optional) The compression codec used to read/write text files. Valid values are `bzip2`, `gzip`, `deflate`, `ZipDeflate`, `TarGzip`, `Tar`, `snappy`, or `lz4`. Please note these values are case-sensitive.
+
+* `compression_level` - (Optional) Specifies the compression level. Possible values are `Optimal` and `Fastest`,
 
 ---
 
@@ -101,23 +105,39 @@ A `http_server_location` block supports the following:
 * `path` - (Optional) The folder path to the file on the web server.
 ---
 
-A `azure_blob_storage_location` block supports the following:
+A `azure_blob_fs_location` block supports the following:
 
-* `container` - (Required) The container on the Azure Blob Storage Account hosting the file.
+* `file_system` - (Optional) The container on the Azure Data Lake Storage Account hosting the file.
 
-* `filename` - (Optional) The filename of the file on the web server.
+* `dynamic_file_system_enabled` - (Optional) Is the `file_system` using dynamic expression, function or system variables? Defaults to `false`.
 
-* `dynamic_container_enabled` - (Optional) Is the `container` using dynamic expression, function or system variables? Defaults to `false`.
+* `path` - (Optional) The folder path to the file on the Azure Data Lake Storage Account.
 
 * `dynamic_path_enabled` - (Optional) Is the `path` using dynamic expression, function or system variables? Defaults to `false`.
 
+* `filename` - (Optional) The filename of the file on the Azure Data Lake Storage Account.
+
 * `dynamic_filename_enabled` - (Optional) Is the `filename` using dynamic expression, function or system variables? Defaults to `false`.
 
-* `path` - (Optional) The folder path to the file on the web server.
+---
+
+An `azure_blob_storage_location` block supports the following:
+
+* `container` - (Required) The container on the Azure Blob Storage Account hosting the file.
+
+* `dynamic_container_enabled` - (Optional) Is the `container` using dynamic expression, function or system variables? Defaults to `false`.
+
+* `path` - (Optional) The folder path to the file on the Azure Blob Storage Account.
+
+* `dynamic_path_enabled` - (Optional) Is the `path` using dynamic expression, function or system variables? Defaults to `false`.
+
+* `filename` - (Optional) The filename of the file on the Azure Blob Storage Account.
+
+* `dynamic_filename_enabled` - (Optional) Is the `filename` using dynamic expression, function or system variables? Defaults to `false`.
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Data Factory Dataset.
 

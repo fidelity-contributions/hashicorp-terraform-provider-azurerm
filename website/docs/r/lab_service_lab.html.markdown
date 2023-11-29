@@ -18,7 +18,7 @@ resource "azurerm_resource_group" "example" {
   location = "West Europe"
 }
 
-resource "azurerm_lab_services_lab" "example" {
+resource "azurerm_lab_service_lab" "example" {
   name                = "example-lab"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
@@ -35,9 +35,9 @@ resource "azurerm_lab_services_lab" "example" {
     }
 
     image_reference {
-      offer     = "0001-com-ubuntu-server-focal"
-      publisher = "canonical"
-      sku       = "20_04-lts"
+      publisher = "Canonical"
+      offer     = "0001-com-ubuntu-server-jammy"
+      sku       = "22_04-lts"
       version   = "latest"
     }
 
@@ -161,9 +161,9 @@ An `image_reference` block supports the following:
 
 A `non_admin_user` block supports the following:
 
-* `username` - (Required) The username to use when signing in to Lab Service Lab VMs. Changing this forces a new resource to be created.
+* `username` - (Required) The username to use when signing in to Lab Service Lab VMs.
 
-* `password` - (Required) The password for the user. Changing this forces a new resource to be created.
+* `password` - (Required) The password for the user.
 
 ---
 
@@ -179,7 +179,7 @@ A `sku` block supports the following:
 
 A `network` block supports the following:
 
-* `subnet_id` - (Optional) The resource ID of the Subnet for the network profile of the Lab Service Lab. Changing this forces a new resource to be created.
+* `subnet_id` - (Optional) The resource ID of the Subnet for the network profile of the Lab Service Lab.
 
 ---
 

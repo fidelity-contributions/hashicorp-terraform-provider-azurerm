@@ -67,7 +67,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The (Terraform specific) ID of the Association between the Network Interface and the Application Security Group.
 
@@ -76,7 +76,6 @@ The following attributes are exported:
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/language/resources/syntax#operation-timeouts) for certain actions:
 
 * `create` - (Defaults to 30 minutes) Used when creating the association between the Network Interface and the Application Security Group.
-* `update` - (Defaults to 30 minutes) Used when updating the association between the Network Interface and the Application Security Group.
 * `read` - (Defaults to 5 minutes) Used when retrieving the association between the Network Interface and the Application Security Group.
 * `delete` - (Defaults to 30 minutes) Used when deleting the association between the Network Interface and the Application Security Group.
 
@@ -85,7 +84,7 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/l
 Associations between Network Interfaces and Application Security Groups can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import azurerm_network_interface_application_security_group_association.association1 "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/microsoft.network/networkInterfaces/nic1|/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group1/providers/Microsoft.Network/applicationSecurityGroups/securityGroup1"
+terraform import azurerm_network_interface_application_security_group_association.association1 "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mygroup1/providers/Microsoft.Network/networkInterfaces/nic1|/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group1/providers/Microsoft.Network/applicationSecurityGroups/securityGroup1"
 ```
 
 -> **NOTE:** This ID is specific to Terraform - and is of the format `{networkInterfaceId}|{applicationSecurityGroupId}`.

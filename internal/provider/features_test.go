@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 import (
@@ -65,6 +68,9 @@ func TestExpandFeatures(t *testing.T) {
 				ResourceGroup: features.ResourceGroupFeatures{
 					PreventDeletionIfContainsResources: true,
 				},
+				Subscription: features.SubscriptionFeatures{
+					PreventCancellationOnDestroy: false,
+				},
 			},
 		},
 		{
@@ -116,14 +122,14 @@ func TestExpandFeatures(t *testing.T) {
 							"expand_without_downtime": true,
 						},
 					},
-					"network": []interface{}{
-						map[string]interface{}{
-							"relaxed_locking": true,
-						},
-					},
 					"resource_group": []interface{}{
 						map[string]interface{}{
 							"prevent_deletion_if_contains_resources": true,
+						},
+					},
+					"subscription": []interface{}{
+						map[string]interface{}{
+							"prevent_cancellation_on_destroy": true,
 						},
 					},
 					"template_deployment": []interface{}{
@@ -181,6 +187,9 @@ func TestExpandFeatures(t *testing.T) {
 				},
 				ResourceGroup: features.ResourceGroupFeatures{
 					PreventDeletionIfContainsResources: true,
+				},
+				Subscription: features.SubscriptionFeatures{
+					PreventCancellationOnDestroy: true,
 				},
 				TemplateDeployment: features.TemplateDeploymentFeatures{
 					DeleteNestedItemsDuringDeletion: true,
@@ -246,14 +255,14 @@ func TestExpandFeatures(t *testing.T) {
 							"expand_without_downtime": false,
 						},
 					},
-					"network_locking": []interface{}{
-						map[string]interface{}{
-							"relaxed_locking": false,
-						},
-					},
 					"resource_group": []interface{}{
 						map[string]interface{}{
 							"prevent_deletion_if_contains_resources": false,
+						},
+					},
+					"subscription": []interface{}{
+						map[string]interface{}{
+							"prevent_cancellation_on_destroy": false,
 						},
 					},
 					"template_deployment": []interface{}{
@@ -311,6 +320,9 @@ func TestExpandFeatures(t *testing.T) {
 				},
 				ResourceGroup: features.ResourceGroupFeatures{
 					PreventDeletionIfContainsResources: false,
+				},
+				Subscription: features.SubscriptionFeatures{
+					PreventCancellationOnDestroy: false,
 				},
 				TemplateDeployment: features.TemplateDeploymentFeatures{
 					DeleteNestedItemsDuringDeletion: false,
@@ -1200,6 +1212,54 @@ func TestExpandFeaturesManagedDisk(t *testing.T) {
 		result := expandFeatures(testCase.Input)
 		if !reflect.DeepEqual(result.ManagedDisk, testCase.Expected.ManagedDisk) {
 			t.Fatalf("Expected %+v but got %+v", result.ManagedDisk, testCase.Expected.ManagedDisk)
+		}
+	}
+}
+
+func TestExpandFeaturesSubscription(t *testing.T) {
+	testData := []struct {
+		Name     string
+		Input    []interface{}
+		EnvVars  map[string]interface{}
+		Expected features.UserFeatures
+	}{
+		{
+			Name: "Empty Block",
+			Input: []interface{}{
+				map[string]interface{}{
+					"subscription": []interface{}{},
+				},
+			},
+			Expected: features.UserFeatures{
+				Subscription: features.SubscriptionFeatures{
+					PreventCancellationOnDestroy: false,
+				},
+			},
+		},
+		{
+			Name: "No Downtime Resize Enabled",
+			Input: []interface{}{
+				map[string]interface{}{
+					"subscription": []interface{}{
+						map[string]interface{}{
+							"prevent_cancellation_on_destroy": true,
+						},
+					},
+				},
+			},
+			Expected: features.UserFeatures{
+				Subscription: features.SubscriptionFeatures{
+					PreventCancellationOnDestroy: true,
+				},
+			},
+		},
+	}
+
+	for _, testCase := range testData {
+		t.Logf("[DEBUG] Test Case: %q", testCase.Name)
+		result := expandFeatures(testCase.Input)
+		if !reflect.DeepEqual(result.Subscription, testCase.Expected.Subscription) {
+			t.Fatalf("Expected %+v but got %+v", result.Subscription, testCase.Expected.Subscription)
 		}
 	}
 }

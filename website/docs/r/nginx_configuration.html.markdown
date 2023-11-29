@@ -13,8 +13,65 @@ Manages the configuration for a Nginx Deployment.
 ## Example Usage
 
 ```hcl
-resource "azurerm_nginx_configuration" "test" {
-  nginx_deployment_id = azurerm_nginx_deployment.test.id
+resource "azurerm_resource_group" "example" {
+  name     = "example-rg"
+  location = "West Europe"
+}
+
+resource "azurerm_public_ip" "example" {
+  name                = "example"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+  allocation_method   = "Static"
+  sku                 = "Standard"
+
+  tags = {
+    environment = "Production"
+  }
+}
+
+resource "azurerm_virtual_network" "example" {
+  name                = "example-vnet"
+  address_space       = ["10.0.0.0/16"]
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+}
+
+resource "azurerm_subnet" "example" {
+  name                 = "example-subnet"
+  resource_group_name  = azurerm_resource_group.example.name
+  virtual_network_name = azurerm_virtual_network.example.name
+  address_prefixes     = ["10.0.2.0/24"]
+  delegation {
+    name = "delegation"
+
+    service_delegation {
+      name = "NGINX.NGINXPLUS/nginxDeployments"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+      ]
+    }
+  }
+}
+
+resource "azurerm_nginx_deployment" "example" {
+  name                     = "example-nginx"
+  resource_group_name      = azurerm_resource_group.example.name
+  sku                      = "publicpreview_Monthly_gmz7xq9ge3py"
+  location                 = azurerm_resource_group.example.location
+  managed_resource_group   = "example"
+  diagnose_support_enabled = true
+
+  frontend_public {
+    ip_address = [azurerm_public_ip.example.id]
+  }
+  network_interface {
+    subnet_id = azurerm_subnet.example.id
+  }
+}
+
+resource "azurerm_nginx_configuration" "example" {
+  nginx_deployment_id = azurerm_nginx_deployment.example.id
   root_file           = "/etc/nginx/nginx.conf"
 
   config_file {
@@ -57,17 +114,19 @@ EOT
 
 The following arguments are supported:
 
-* `config_file` - (Required) One or more `config_file` blocks as defined below.
-
 * `nginx_deployment_id` - (Required) The ID of the Nginx Deployment. Changing this forces a new Nginx Configuration to be created.
 
 * `root_file` - (Required) Specify the root file path of this Nginx Configuration.
 
 ---
 
+-> **NOTE:** Either `package_data` or `config_file` must be specified - but not both.
+
 * `package_data` - (Optional) Specify the package data for this configuration.
 
-* `protected_file` - (Optional) One or more `config_file` (Protected File) blocks with sensitive information as defined below.
+* `config_file` - (Optional) One or more `config_file` blocks as defined below.
+
+* `protected_file` - (Optional) One or more `protected_file` blocks with sensitive information as defined below. If specified `config_file` must also be specified.
 
 ---
 
@@ -79,7 +138,7 @@ A `config_file` block supports the following:
 
 ---
 
-A `config_file` (Protected File) block supports the following:
+A `protected_file` (Protected File) block supports the following:
 
 * `content` - (Required) Specifies the base-64 encoded contents of this config file (Sensitive).
 

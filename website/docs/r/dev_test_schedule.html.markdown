@@ -67,7 +67,7 @@ The following arguments are supported:
 
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 
-* `notification_settings` - (Required) The notification setting of a schedule. A `notification_settings` as defined below.
+* `notification_settings` - (Required) The notification setting of a schedule. A `notification_settings` block as defined below.
 
 * `weekly_recurrence` - (Optional) The properties of a weekly schedule. If the schedule occurs only some days of the week, specify the weekly recurrence. A `weekly_recurrence` block as defined below.
 
@@ -107,7 +107,7 @@ A `notification_settings` block supports the following:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the DevTest Schedule.
 

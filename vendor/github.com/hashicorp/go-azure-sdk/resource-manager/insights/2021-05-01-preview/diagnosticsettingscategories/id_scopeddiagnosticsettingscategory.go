@@ -7,19 +7,22 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = ScopedDiagnosticSettingsCategoryId{}
 
 // ScopedDiagnosticSettingsCategoryId is a struct representing the Resource ID for a Scoped Diagnostic Settings Category
 type ScopedDiagnosticSettingsCategoryId struct {
-	ResourceUri string
-	Name        string
+	ResourceUri                    string
+	DiagnosticSettingsCategoryName string
 }
 
 // NewScopedDiagnosticSettingsCategoryID returns a new ScopedDiagnosticSettingsCategoryId struct
-func NewScopedDiagnosticSettingsCategoryID(resourceUri string, name string) ScopedDiagnosticSettingsCategoryId {
+func NewScopedDiagnosticSettingsCategoryID(resourceUri string, diagnosticSettingsCategoryName string) ScopedDiagnosticSettingsCategoryId {
 	return ScopedDiagnosticSettingsCategoryId{
-		ResourceUri: resourceUri,
-		Name:        name,
+		ResourceUri:                    resourceUri,
+		DiagnosticSettingsCategoryName: diagnosticSettingsCategoryName,
 	}
 }
 
@@ -31,15 +34,9 @@ func ParseScopedDiagnosticSettingsCategoryID(input string) (*ScopedDiagnosticSet
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := ScopedDiagnosticSettingsCategoryId{}
-
-	if id.ResourceUri, ok = parsed.Parsed["resourceUri"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceUri' was not found in the resource id %q", input)
-	}
-
-	if id.Name, ok = parsed.Parsed["name"]; !ok {
-		return nil, fmt.Errorf("the segment 'name' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -54,18 +51,26 @@ func ParseScopedDiagnosticSettingsCategoryIDInsensitively(input string) (*Scoped
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := ScopedDiagnosticSettingsCategoryId{}
-
-	if id.ResourceUri, ok = parsed.Parsed["resourceUri"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceUri' was not found in the resource id %q", input)
-	}
-
-	if id.Name, ok = parsed.Parsed["name"]; !ok {
-		return nil, fmt.Errorf("the segment 'name' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *ScopedDiagnosticSettingsCategoryId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.ResourceUri, ok = input.Parsed["resourceUri"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceUri", input)
+	}
+
+	if id.DiagnosticSettingsCategoryName, ok = input.Parsed["diagnosticSettingsCategoryName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "diagnosticSettingsCategoryName", input)
+	}
+
+	return nil
 }
 
 // ValidateScopedDiagnosticSettingsCategoryID checks that 'input' can be parsed as a Scoped Diagnostic Settings Category ID
@@ -86,7 +91,7 @@ func ValidateScopedDiagnosticSettingsCategoryID(input interface{}, key string) (
 // ID returns the formatted Scoped Diagnostic Settings Category ID
 func (id ScopedDiagnosticSettingsCategoryId) ID() string {
 	fmtString := "/%s/providers/Microsoft.Insights/diagnosticSettingsCategories/%s"
-	return fmt.Sprintf(fmtString, strings.TrimPrefix(id.ResourceUri, "/"), id.Name)
+	return fmt.Sprintf(fmtString, strings.TrimPrefix(id.ResourceUri, "/"), id.DiagnosticSettingsCategoryName)
 }
 
 // Segments returns a slice of Resource ID Segments which comprise this Scoped Diagnostic Settings Category ID
@@ -96,7 +101,7 @@ func (id ScopedDiagnosticSettingsCategoryId) Segments() []resourceids.Segment {
 		resourceids.StaticSegment("staticProviders", "providers", "providers"),
 		resourceids.ResourceProviderSegment("staticMicrosoftInsights", "Microsoft.Insights", "Microsoft.Insights"),
 		resourceids.StaticSegment("staticDiagnosticSettingsCategories", "diagnosticSettingsCategories", "diagnosticSettingsCategories"),
-		resourceids.UserSpecifiedSegment("name", "nameValue"),
+		resourceids.UserSpecifiedSegment("diagnosticSettingsCategoryName", "diagnosticSettingsCategoryValue"),
 	}
 }
 
@@ -104,7 +109,7 @@ func (id ScopedDiagnosticSettingsCategoryId) Segments() []resourceids.Segment {
 func (id ScopedDiagnosticSettingsCategoryId) String() string {
 	components := []string{
 		fmt.Sprintf("Resource Uri: %q", id.ResourceUri),
-		fmt.Sprintf("Name: %q", id.Name),
+		fmt.Sprintf("Diagnostic Settings Category Name: %q", id.DiagnosticSettingsCategoryName),
 	}
 	return fmt.Sprintf("Scoped Diagnostic Settings Category (%s)", strings.Join(components, "\n"))
 }

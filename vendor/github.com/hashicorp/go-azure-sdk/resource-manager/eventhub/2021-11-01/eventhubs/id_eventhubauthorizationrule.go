@@ -7,6 +7,9 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = EventhubAuthorizationRuleId{}
 
 // EventhubAuthorizationRuleId is a struct representing the Resource ID for a Eventhub Authorization Rule
@@ -14,17 +17,17 @@ type EventhubAuthorizationRuleId struct {
 	SubscriptionId        string
 	ResourceGroupName     string
 	NamespaceName         string
-	EventHubName          string
+	EventhubName          string
 	AuthorizationRuleName string
 }
 
 // NewEventhubAuthorizationRuleID returns a new EventhubAuthorizationRuleId struct
-func NewEventhubAuthorizationRuleID(subscriptionId string, resourceGroupName string, namespaceName string, eventHubName string, authorizationRuleName string) EventhubAuthorizationRuleId {
+func NewEventhubAuthorizationRuleID(subscriptionId string, resourceGroupName string, namespaceName string, eventhubName string, authorizationRuleName string) EventhubAuthorizationRuleId {
 	return EventhubAuthorizationRuleId{
 		SubscriptionId:        subscriptionId,
 		ResourceGroupName:     resourceGroupName,
 		NamespaceName:         namespaceName,
-		EventHubName:          eventHubName,
+		EventhubName:          eventhubName,
 		AuthorizationRuleName: authorizationRuleName,
 	}
 }
@@ -37,27 +40,9 @@ func ParseEventhubAuthorizationRuleID(input string) (*EventhubAuthorizationRuleI
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := EventhubAuthorizationRuleId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.NamespaceName, ok = parsed.Parsed["namespaceName"]; !ok {
-		return nil, fmt.Errorf("the segment 'namespaceName' was not found in the resource id %q", input)
-	}
-
-	if id.EventHubName, ok = parsed.Parsed["eventHubName"]; !ok {
-		return nil, fmt.Errorf("the segment 'eventHubName' was not found in the resource id %q", input)
-	}
-
-	if id.AuthorizationRuleName, ok = parsed.Parsed["authorizationRuleName"]; !ok {
-		return nil, fmt.Errorf("the segment 'authorizationRuleName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -72,30 +57,38 @@ func ParseEventhubAuthorizationRuleIDInsensitively(input string) (*EventhubAutho
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := EventhubAuthorizationRuleId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.NamespaceName, ok = parsed.Parsed["namespaceName"]; !ok {
-		return nil, fmt.Errorf("the segment 'namespaceName' was not found in the resource id %q", input)
-	}
-
-	if id.EventHubName, ok = parsed.Parsed["eventHubName"]; !ok {
-		return nil, fmt.Errorf("the segment 'eventHubName' was not found in the resource id %q", input)
-	}
-
-	if id.AuthorizationRuleName, ok = parsed.Parsed["authorizationRuleName"]; !ok {
-		return nil, fmt.Errorf("the segment 'authorizationRuleName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *EventhubAuthorizationRuleId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.ResourceGroupName, ok = input.Parsed["resourceGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroupName", input)
+	}
+
+	if id.NamespaceName, ok = input.Parsed["namespaceName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "namespaceName", input)
+	}
+
+	if id.EventhubName, ok = input.Parsed["eventhubName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "eventhubName", input)
+	}
+
+	if id.AuthorizationRuleName, ok = input.Parsed["authorizationRuleName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "authorizationRuleName", input)
+	}
+
+	return nil
 }
 
 // ValidateEventhubAuthorizationRuleID checks that 'input' can be parsed as a Eventhub Authorization Rule ID
@@ -116,7 +109,7 @@ func ValidateEventhubAuthorizationRuleID(input interface{}, key string) (warning
 // ID returns the formatted Eventhub Authorization Rule ID
 func (id EventhubAuthorizationRuleId) ID() string {
 	fmtString := "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.EventHub/namespaces/%s/eventhubs/%s/authorizationRules/%s"
-	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.NamespaceName, id.EventHubName, id.AuthorizationRuleName)
+	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.NamespaceName, id.EventhubName, id.AuthorizationRuleName)
 }
 
 // Segments returns a slice of Resource ID Segments which comprise this Eventhub Authorization Rule ID
@@ -131,7 +124,7 @@ func (id EventhubAuthorizationRuleId) Segments() []resourceids.Segment {
 		resourceids.StaticSegment("staticNamespaces", "namespaces", "namespaces"),
 		resourceids.UserSpecifiedSegment("namespaceName", "namespaceValue"),
 		resourceids.StaticSegment("staticEventhubs", "eventhubs", "eventhubs"),
-		resourceids.UserSpecifiedSegment("eventHubName", "eventHubValue"),
+		resourceids.UserSpecifiedSegment("eventhubName", "eventhubValue"),
 		resourceids.StaticSegment("staticAuthorizationRules", "authorizationRules", "authorizationRules"),
 		resourceids.UserSpecifiedSegment("authorizationRuleName", "authorizationRuleValue"),
 	}
@@ -143,7 +136,7 @@ func (id EventhubAuthorizationRuleId) String() string {
 		fmt.Sprintf("Subscription: %q", id.SubscriptionId),
 		fmt.Sprintf("Resource Group Name: %q", id.ResourceGroupName),
 		fmt.Sprintf("Namespace Name: %q", id.NamespaceName),
-		fmt.Sprintf("Event Hub Name: %q", id.EventHubName),
+		fmt.Sprintf("Eventhub Name: %q", id.EventhubName),
 		fmt.Sprintf("Authorization Rule Name: %q", id.AuthorizationRuleName),
 	}
 	return fmt.Sprintf("Eventhub Authorization Rule (%s)", strings.Join(components, "\n"))

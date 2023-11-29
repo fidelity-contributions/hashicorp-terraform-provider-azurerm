@@ -21,8 +21,8 @@ resource "azurerm_resource_group" "example" {
 resource "azurerm_virtual_network" "example" {
   name                = "testvnet"
   address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.test.location
-  resource_group_name = azurerm_resource_group.test.name
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
 }
 
 resource "azurerm_subnet" "example" {
@@ -48,8 +48,8 @@ resource "azurerm_subnet" "example" {
 
 resource "azurerm_orbital_contact_profile" "example" {
   name                              = "example-contact-profile"
-  resource_group_name               = azurerm_resource_group.test.name
-  location                          = azurerm_resource_group.test.location
+  resource_group_name               = azurerm_resource_group.example.name
+  location                          = azurerm_resource_group.example.location
   minimum_variable_contact_duration = "PT1M"
   auto_tracking                     = "disabled"
 
@@ -90,7 +90,7 @@ The following arguments are supported:
 
 * `network_configuration_subnet_id` - (Required) ARM resource identifier of the subnet delegated to the Microsoft.Orbital/orbitalGateways. Needs to be at least a class C subnet, and should not have any IP created in it. Changing this forces a new resource to be created.
 
-* `links` - (Required) A list of spacecraft links. A `links` block as defined below.
+* `links` - (Required) A list of spacecraft links. A `links` block as defined below. Changing this forces a new resource to be created.
 
 * `event_hub_uri` - (Optional) ARM resource identifier of the Event Hub used for telemetry. Requires granting Orbital Resource Provider the rights to send telemetry into the hub.
 
@@ -102,7 +102,7 @@ The following arguments are supported:
 
 A `links` block supports the following:
 
-* `channels` - (Required) A list of contact profile link channels. A `channels` block as defined below.
+* `channels` - (Required) A list of contact profile link channels. A `channels` block as defined below. Changing this forces a new resource to be created.
 
 * `direction` - (Required) Direction of the link. Possible values are `Uplink` and `Downlink`.
 
@@ -132,11 +132,11 @@ An `end_point` block supports the following:
 
 * `end_point_name` - (Required) Name of an end point.
 
-* `ip_address` - (Required) IP address of an end point.
-
 * `port` - (Required) TCP port to listen on to receive data.
 
 * `protocol` - (Required) Protocol of an end point. Possible values are `TCP` and `UDP`.
+
+* `ip_address` - (Optional) IP address of an end point.
 
 ---
 

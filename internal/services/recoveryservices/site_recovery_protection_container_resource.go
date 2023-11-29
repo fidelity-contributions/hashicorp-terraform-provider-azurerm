@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package recoveryservices
 
 import (
@@ -19,7 +22,6 @@ func resourceSiteRecoveryProtectionContainer() *pluginsdk.Resource {
 	return &pluginsdk.Resource{
 		Create: resourceSiteRecoveryProtectionContainerCreate,
 		Read:   resourceSiteRecoveryProtectionContainerRead,
-		Update: nil,
 		Delete: resourceSiteRecoveryProtectionContainerDelete,
 		Importer: pluginsdk.ImporterValidatingResourceId(func(id string) error {
 			_, err := replicationprotectioncontainers.ParseReplicationProtectionContainerID(id)
@@ -29,7 +31,6 @@ func resourceSiteRecoveryProtectionContainer() *pluginsdk.Resource {
 		Timeouts: &pluginsdk.ResourceTimeout{
 			Create: pluginsdk.DefaultTimeout(30 * time.Minute),
 			Read:   pluginsdk.DefaultTimeout(5 * time.Minute),
-			Update: pluginsdk.DefaultTimeout(30 * time.Minute),
 			Delete: pluginsdk.DefaultTimeout(30 * time.Minute),
 		},
 
@@ -117,10 +118,10 @@ func resourceSiteRecoveryProtectionContainerRead(d *pluginsdk.ResourceData, meta
 		return fmt.Errorf("making Read request on site recovery protection container %s : %+v", id.String(), err)
 	}
 
-	d.Set("name", id.ProtectionContainerName)
+	d.Set("name", id.ReplicationProtectionContainerName)
 	d.Set("resource_group_name", id.ResourceGroupName)
-	d.Set("recovery_vault_name", id.ResourceName)
-	d.Set("recovery_fabric_name", id.FabricName)
+	d.Set("recovery_vault_name", id.VaultName)
+	d.Set("recovery_fabric_name", id.ReplicationFabricName)
 	return nil
 }
 

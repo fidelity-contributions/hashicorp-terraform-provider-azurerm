@@ -51,9 +51,11 @@ The following arguments are supported:
 
 * `tags` - (Optional) A mapping of tags which should be assigned to the Azure Stack HCI Cluster.
 
+* `automanage_configuration_id` - (Optional) The ID of the Automanage Configuration assigned to the Azure Stack HCI Cluster.
+
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Azure Stack HCI Cluster.
 

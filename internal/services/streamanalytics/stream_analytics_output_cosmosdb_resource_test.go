@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package streamanalytics_test
 
 import (
@@ -6,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/go-azure-helpers/lang/response"
-	"github.com/hashicorp/go-azure-sdk/resource-manager/streamanalytics/2020-03-01/outputs"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/streamanalytics/2021-10-01-preview/outputs"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance/check"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
@@ -154,7 +157,7 @@ resource "azurerm_stream_analytics_output_cosmosdb" "test" {
   cosmosdb_sql_database_id = azurerm_cosmosdb_sql_database.test.id
   container_name           = azurerm_cosmosdb_sql_container.test.name
   document_id              = "exampledocumentid"
-  partition_key            = "exmaplekey"
+  partition_key            = "examplekey"
 }
 `, template, data.RandomString, data.RandomInteger)
 }

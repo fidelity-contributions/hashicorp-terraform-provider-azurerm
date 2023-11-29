@@ -40,15 +40,15 @@ The following arguments are supported:
 
 * `schedule_name` - (Required) The name of the Schedule. Changing this forces a new resource to be created.
 
-* `parameters` -  (Optional) A map of key/value pairs corresponding to the arguments that can be passed to the Runbook. Changing this forces a new resource to be created.
+* `parameters` - (Optional) A map of key/value pairs corresponding to the arguments that can be passed to the Runbook. Changing this forces a new resource to be created.
 
 -> **NOTE:** The parameter keys/names must strictly be in lowercase, even if this is not the case in the runbook. This is due to a limitation in Azure Automation where the parameter names are normalized. The values specified don't have this limitation.
 
-* `run_on` -  (Optional) Name of a Hybrid Worker Group the Runbook will be executed on. Changing this forces a new resource to be created.
+* `run_on` - (Optional) Name of a Hybrid Worker Group the Runbook will be executed on. Changing this forces a new resource to be created.
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Automation Job Schedule.
 
@@ -59,7 +59,6 @@ The following attributes are exported:
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/language/resources/syntax#operation-timeouts) for certain actions:
 
 * `create` - (Defaults to 30 minutes) Used when creating the Automation Job Schedule.
-* `update` - (Defaults to 30 minutes) Used when updating the Automation Job Schedule.
 * `read` - (Defaults to 5 minutes) Used when retrieving the Automation Job Schedule.
 * `delete` - (Defaults to 30 minutes) Used when deleting the Automation Job Schedule.
 

@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package managedidentity
 
 import (
@@ -8,7 +11,8 @@ import (
 	"github.com/hashicorp/go-azure-helpers/lang/response"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonids"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonschema"
-	"github.com/hashicorp/go-azure-sdk/resource-manager/managedidentity/2022-01-31-preview/managedidentities"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/managedidentity/2023-01-31/managedidentities"
+	"github.com/hashicorp/terraform-provider-azurerm/internal/locks"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/sdk"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 )
@@ -59,9 +63,11 @@ func (r FederatedIdentityCredentialResource) Arguments() map[string]*pluginsdk.S
 		},
 		"resource_group_name": commonschema.ResourceGroupName(),
 		"parent_id": {
-			ForceNew: true,
-			Required: true,
-			Type:     pluginsdk.TypeString,
+			// TODO: this wants renaming to `user_assigned_identity_id` (and `resource_group_name` removing in 4.0)
+			Type:         pluginsdk.TypeString,
+			ForceNew:     true,
+			Required:     true,
+			ValidateFunc: commonids.ValidateUserAssignedIdentityID,
 		},
 		"subject": {
 			ForceNew: true,
@@ -77,7 +83,7 @@ func (r FederatedIdentityCredentialResource) Create() sdk.ResourceFunc {
 	return sdk.ResourceFunc{
 		Timeout: 30 * time.Minute,
 		Func: func(ctx context.Context, metadata sdk.ResourceMetaData) error {
-			client := metadata.Client.ManagedIdentity.ManagedIdentities
+			client := metadata.Client.ManagedIdentity.V20230131.ManagedIdentities
 
 			var config FederatedIdentityCredentialResourceSchema
 			if err := metadata.Decode(&config); err != nil {
@@ -89,7 +95,11 @@ func (r FederatedIdentityCredentialResource) Create() sdk.ResourceFunc {
 			if err != nil {
 				return fmt.Errorf("parsing parent resource ID: %+v", err)
 			}
-			id := managedidentities.NewFederatedIdentityCredentialID(subscriptionId, config.ResourceGroupName, parentId.ResourceName, config.Name)
+
+			locks.ByID(parentId.ID())
+			defer locks.UnlockByID(parentId.ID())
+
+			id := managedidentities.NewFederatedIdentityCredentialID(subscriptionId, config.ResourceGroupName, parentId.UserAssignedIdentityName, config.Name)
 
 			existing, err := client.FederatedIdentityCredentialsGet(ctx, id)
 			if err != nil {
@@ -117,7 +127,7 @@ func (r FederatedIdentityCredentialResource) Read() sdk.ResourceFunc {
 	return sdk.ResourceFunc{
 		Timeout: 5 * time.Minute,
 		Func: func(ctx context.Context, metadata sdk.ResourceMetaData) error {
-			client := metadata.Client.ManagedIdentity.ManagedIdentities
+			client := metadata.Client.ManagedIdentity.V20230131.ManagedIdentities
 			schema := FederatedIdentityCredentialResourceSchema{}
 
 			id, err := managedidentities.ParseFederatedIdentityCredentialID(metadata.ResourceData.Id())
@@ -134,9 +144,9 @@ func (r FederatedIdentityCredentialResource) Read() sdk.ResourceFunc {
 			}
 
 			if model := resp.Model; model != nil {
-				schema.Name = id.FederatedIdentityCredentialResourceName
+				schema.Name = id.FederatedIdentityCredentialName
 				schema.ResourceGroupName = id.ResourceGroupName
-				parentId := commonids.NewUserAssignedIdentityID(id.SubscriptionId, id.ResourceGroupName, id.ResourceName)
+				parentId := commonids.NewUserAssignedIdentityID(id.SubscriptionId, id.ResourceGroupName, id.UserAssignedIdentityName)
 				schema.ResourceName = parentId.ID()
 				r.mapFederatedIdentityCredentialToFederatedIdentityCredentialResourceSchema(*model, &schema)
 			}
@@ -149,7 +159,20 @@ func (r FederatedIdentityCredentialResource) Delete() sdk.ResourceFunc {
 	return sdk.ResourceFunc{
 		Timeout: 30 * time.Minute,
 		Func: func(ctx context.Context, metadata sdk.ResourceMetaData) error {
-			client := metadata.Client.ManagedIdentity.ManagedIdentities
+			client := metadata.Client.ManagedIdentity.V20230131.ManagedIdentities
+
+			var config FederatedIdentityCredentialResourceSchema
+			if err := metadata.Decode(&config); err != nil {
+				return fmt.Errorf("decoding: %+v", err)
+			}
+
+			parentId, err := commonids.ParseUserAssignedIdentityID(config.ResourceName)
+			if err != nil {
+				return fmt.Errorf("parsing parent resource ID: %+v", err)
+			}
+
+			locks.ByID(parentId.ID())
+			defer locks.UnlockByID(parentId.ID())
 
 			id, err := managedidentities.ParseFederatedIdentityCredentialID(metadata.ResourceData.Id())
 			if err != nil {

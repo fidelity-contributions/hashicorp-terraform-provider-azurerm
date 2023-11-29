@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package main
 
 import (
@@ -286,8 +289,13 @@ func (gen documentationGenerator) argumentsBlock() string {
 					conflictingValues = append(conflictingValues, fmt.Sprintf("`%s`", v))
 				}
 
-				value += fmt.Sprintf("Conflicts with %s", strings.Join(conflictingValues, ","))
+				value += fmt.Sprintf("Conflicts with %s.", strings.Join(conflictingValues, ","))
 			}
+
+			if field.Default != nil {
+				value += fmt.Sprintf(" Defaults to `%v`.", field.Default)
+			}
+
 			if field.ForceNew {
 				value += fmt.Sprintf(" Changing this forces a new %s to be created.", gen.brandName)
 			}

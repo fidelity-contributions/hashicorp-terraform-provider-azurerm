@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package eventhub
 
 import (
@@ -168,7 +171,7 @@ func (r ConsumerGroupResource) Read() sdk.ResourceFunc {
 			state := ConsumerGroupObject{
 				Name:              id.ConsumerGroupName,
 				NamespaceName:     id.NamespaceName,
-				EventHubName:      id.EventHubName,
+				EventHubName:      id.EventhubName,
 				ResourceGroupName: id.ResourceGroupName,
 			}
 

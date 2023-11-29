@@ -66,7 +66,7 @@ The following arguments are supported:
 
 ---
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The SQL Managed Database ID.
 
@@ -76,7 +76,6 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/l
 
 * `read` - (Defaults to 5 minutes) Used when retrieving the Sql Managed Database.
 * `create` - (Defaults to 24 hours) Used when creating the Sql Managed Database.
-* `update` - (Defaults to 24 hours) Used when updating the Sql Managed Database.
 * `delete` - (Defaults to 24 hours) Used when deleting the Sql Managed Database.
 
 ## Import

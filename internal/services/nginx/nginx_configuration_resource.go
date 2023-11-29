@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package nginx
 
 import (
@@ -7,8 +10,8 @@ import (
 
 	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 	"github.com/hashicorp/go-azure-helpers/lang/response"
-	"github.com/hashicorp/go-azure-sdk/resource-manager/nginx/2022-08-01/nginxconfiguration"
-	"github.com/hashicorp/go-azure-sdk/resource-manager/nginx/2022-08-01/nginxdeployment"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/nginx/2023-04-01/nginxconfiguration"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/nginx/2023-04-01/nginxdeployment"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/sdk"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/validation"
@@ -102,8 +105,9 @@ func (m ConfigurationResource) Arguments() map[string]*pluginsdk.Schema {
 		},
 
 		"config_file": {
-			Type:     pluginsdk.TypeSet,
-			Required: true,
+			Type:         pluginsdk.TypeSet,
+			Optional:     true,
+			AtLeastOneOf: []string{"config_file", "package_data"},
 			Elem: &pluginsdk.Resource{
 				Schema: map[string]*pluginsdk.Schema{
 					"content": {
@@ -122,8 +126,9 @@ func (m ConfigurationResource) Arguments() map[string]*pluginsdk.Schema {
 		},
 
 		"protected_file": {
-			Type:     pluginsdk.TypeSet,
-			Optional: true,
+			Type:         pluginsdk.TypeSet,
+			Optional:     true,
+			RequiredWith: []string{"config_file"},
 			Elem: &pluginsdk.Resource{
 				Schema: map[string]*pluginsdk.Schema{
 					"content": {
@@ -143,9 +148,11 @@ func (m ConfigurationResource) Arguments() map[string]*pluginsdk.Schema {
 		},
 
 		"package_data": {
-			Type:         pluginsdk.TypeString,
-			Optional:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
+			Type:          pluginsdk.TypeString,
+			Optional:      true,
+			ValidateFunc:  validation.StringIsNotEmpty,
+			AtLeastOneOf:  []string{"config_file", "package_data"},
+			ConflictsWith: []string{"protected_file", "config_file"},
 		},
 
 		"root_file": {
@@ -185,7 +192,7 @@ func (m ConfigurationResource) Create() sdk.ResourceFunc {
 			}
 
 			subscriptionID := meta.Client.Account.SubscriptionId
-			id := nginxconfiguration.NewConfigurationID(subscriptionID, deployID.ResourceGroupName, deployID.DeploymentName, defaultConfigurationName)
+			id := nginxconfiguration.NewConfigurationID(subscriptionID, deployID.ResourceGroupName, deployID.NginxDeploymentName, defaultConfigurationName)
 
 			existing, err := client.ConfigurationsGet(ctx, id)
 			if !response.WasNotFound(existing.HttpResponse) {
@@ -196,13 +203,9 @@ func (m ConfigurationResource) Create() sdk.ResourceFunc {
 			}
 
 			req := model.ToSDKModel()
-			future, err := client.ConfigurationsCreateOrUpdate(ctx, id, req)
-			if err != nil {
-				return fmt.Errorf("creating %s: %v", id, err)
-			}
 
-			if err := future.Poller.PollUntilDone(); err != nil {
-				return fmt.Errorf("waiting for creation of %s: %v", id, err)
+			if err := client.ConfigurationsCreateOrUpdateThenPoll(ctx, id, req); err != nil {
+				return fmt.Errorf("creating %s: %v", id, err)
 			}
 
 			meta.SetID(id)
@@ -223,6 +226,9 @@ func (m ConfigurationResource) Read() sdk.ResourceFunc {
 			client := meta.Client.Nginx.NginxConfiguration
 			result, err := client.ConfigurationsGet(ctx, *id)
 			if err != nil {
+				if response.WasNotFound(result.HttpResponse) {
+					return meta.MarkAsGone(id)
+				}
 				return err
 			}
 
@@ -231,7 +237,12 @@ func (m ConfigurationResource) Read() sdk.ResourceFunc {
 			}
 
 			var output ConfigurationModel
-			deployID := nginxdeployment.NewNginxDeploymentID(id.SubscriptionId, id.ResourceGroupName, id.DeploymentName)
+			// protected files field not return by API so decode from state
+			if err := meta.Decode(&output); err != nil {
+				return err
+			}
+
+			deployID := nginxdeployment.NewNginxDeploymentID(id.SubscriptionId, id.ResourceGroupName, id.NginxDeploymentName)
 			output.NginxDeploymentId = deployID.ID()
 
 			if prop := result.Model.Properties; prop != nil {
@@ -250,6 +261,7 @@ func (m ConfigurationResource) Read() sdk.ResourceFunc {
 					}
 				}
 
+				// GET does not return protected files
 				if files := prop.ProtectedFiles; files != nil {
 					for _, file := range *files {
 						output.ProtectedFile = append(output.ProtectedFile, ProtectedFile{
@@ -280,21 +292,27 @@ func (m ConfigurationResource) Update() sdk.ResourceFunc {
 				return fmt.Errorf("decoding err: %+v", err)
 			}
 
-			upd := nginxconfiguration.NginxConfiguration{
-				Name:       pointer.FromString(defaultConfigurationName),
-				Properties: &nginxconfiguration.NginxConfigurationProperties{},
+			// retrieve from GET
+			existing, err := client.ConfigurationsGet(ctx, *id)
+			if err != nil {
+				return fmt.Errorf("retrieving exists: +%v", *id)
+			}
+			if existing.Model == nil && existing.Model.Properties == nil {
+				return fmt.Errorf("retrieving as nil for %v", *id)
 			}
 
+			upd := existing.Model
 			// root file is required in update
-			upd.Properties.RootFile = pointer.FromString(model.RootFile)
+			if meta.ResourceData.HasChange("root_file") {
+				upd.Properties.RootFile = pointer.FromString(model.RootFile)
+			}
 
 			if meta.ResourceData.HasChange("config_file") {
 				upd.Properties.Files = model.toSDKFiles()
 			}
 
-			if meta.ResourceData.HasChange("protected_file") {
-				upd.Properties.Files = model.toSDKProtectedFiles()
-			}
+			// API does not return protected file field, so always set this field
+			upd.Properties.ProtectedFiles = model.toSDKProtectedFiles()
 
 			if meta.ResourceData.HasChange("package_data") {
 				upd.Properties.Package = &nginxconfiguration.NginxConfigurationPackage{
@@ -302,13 +320,8 @@ func (m ConfigurationResource) Update() sdk.ResourceFunc {
 				}
 			}
 
-			result, err := client.ConfigurationsCreateOrUpdate(ctx, *id, upd)
-			if err != nil {
+			if err := client.ConfigurationsCreateOrUpdateThenPoll(ctx, *id, *upd); err != nil {
 				return fmt.Errorf("updating %s: %v", id, err)
-			}
-
-			if err := result.Poller.PollUntilDone(); err != nil {
-				return fmt.Errorf("waiting update %s: %v", *id, err)
 			}
 
 			return nil
@@ -327,13 +340,11 @@ func (m ConfigurationResource) Delete() sdk.ResourceFunc {
 
 			meta.Logger.Infof("deleting %s", id)
 			client := meta.Client.Nginx.NginxConfiguration
-			result, err := client.ConfigurationsDelete(ctx, *id)
-			if err != nil {
+
+			if err := client.ConfigurationsDeleteThenPoll(ctx, *id); err != nil {
 				return fmt.Errorf("deleting %s: %v", id, err)
 			}
-			if err := result.Poller.PollUntilDone(); err != nil {
-				return fmt.Errorf("waiting deleting %s: %v", *id, err)
-			}
+
 			return nil
 		},
 	}

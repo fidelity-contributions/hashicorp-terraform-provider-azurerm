@@ -7,19 +7,22 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = LocationId{}
 
 // LocationId is a struct representing the Resource ID for a Location
 type LocationId struct {
 	SubscriptionId string
-	Location       string
+	LocationName   string
 }
 
 // NewLocationID returns a new LocationId struct
-func NewLocationID(subscriptionId string, location string) LocationId {
+func NewLocationID(subscriptionId string, locationName string) LocationId {
 	return LocationId{
 		SubscriptionId: subscriptionId,
-		Location:       location,
+		LocationName:   locationName,
 	}
 }
 
@@ -31,15 +34,9 @@ func ParseLocationID(input string) (*LocationId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := LocationId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.Location, ok = parsed.Parsed["location"]; !ok {
-		return nil, fmt.Errorf("the segment 'location' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -54,18 +51,26 @@ func ParseLocationIDInsensitively(input string) (*LocationId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := LocationId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.Location, ok = parsed.Parsed["location"]; !ok {
-		return nil, fmt.Errorf("the segment 'location' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *LocationId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.LocationName, ok = input.Parsed["locationName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "locationName", input)
+	}
+
+	return nil
 }
 
 // ValidateLocationID checks that 'input' can be parsed as a Location ID
@@ -86,7 +91,7 @@ func ValidateLocationID(input interface{}, key string) (warnings []string, error
 // ID returns the formatted Location ID
 func (id LocationId) ID() string {
 	fmtString := "/subscriptions/%s/providers/Microsoft.AnalysisServices/locations/%s"
-	return fmt.Sprintf(fmtString, id.SubscriptionId, id.Location)
+	return fmt.Sprintf(fmtString, id.SubscriptionId, id.LocationName)
 }
 
 // Segments returns a slice of Resource ID Segments which comprise this Location ID
@@ -97,7 +102,7 @@ func (id LocationId) Segments() []resourceids.Segment {
 		resourceids.StaticSegment("staticProviders", "providers", "providers"),
 		resourceids.ResourceProviderSegment("staticMicrosoftAnalysisServices", "Microsoft.AnalysisServices", "Microsoft.AnalysisServices"),
 		resourceids.StaticSegment("staticLocations", "locations", "locations"),
-		resourceids.UserSpecifiedSegment("location", "locationValue"),
+		resourceids.UserSpecifiedSegment("locationName", "locationValue"),
 	}
 }
 
@@ -105,7 +110,7 @@ func (id LocationId) Segments() []resourceids.Segment {
 func (id LocationId) String() string {
 	components := []string{
 		fmt.Sprintf("Subscription: %q", id.SubscriptionId),
-		fmt.Sprintf("Location: %q", id.Location),
+		fmt.Sprintf("Location Name: %q", id.LocationName),
 	}
 	return fmt.Sprintf("Location (%s)", strings.Join(components, "\n"))
 }

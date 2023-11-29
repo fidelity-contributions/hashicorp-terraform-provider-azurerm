@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package springcloud
 
 import (
@@ -19,7 +22,7 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/validation"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/timeouts"
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
-	"github.com/tombuildsstuff/kermit/sdk/appplatform/2022-11-01-preview/appplatform"
+	"github.com/tombuildsstuff/kermit/sdk/appplatform/2023-05-01-preview/appplatform"
 )
 
 func resourceSpringCloudApp() *pluginsdk.Resource {
@@ -471,15 +474,14 @@ func expandAppCustomPersistentDiskResourceArray(input []interface{}, id parse.Sp
 				MountPath:    utils.String(v["mount_path"].(string)),
 				ReadOnly:     utils.Bool(v["read_only_enabled"].(bool)),
 				MountOptions: utils.ExpandStringSlice(v["mount_options"].(*pluginsdk.Set).List()),
-				Type:         appplatform.TypeAzureFileVolume,
 			},
 		})
 	}
 	return &results
 }
 
-func expandSpringCloudAppAddon(input string) (map[string]map[string]interface{}, error) {
-	var addonConfig map[string]map[string]interface{}
+func expandSpringCloudAppAddon(input string) (map[string]interface{}, error) {
+	var addonConfig map[string]interface{}
 	if len(input) != 0 {
 		err := json.Unmarshal([]byte(input), &addonConfig)
 		if err != nil {
@@ -560,7 +562,10 @@ func flattenAppCustomPersistentDiskResourceArray(input *[]appplatform.CustomPers
 	for _, item := range *input {
 		var storageName string
 		if item.StorageID != nil {
-			if id, err := parse.SpringCloudStorageID(*item.StorageID); err == nil {
+			// The returned value has inconsistent casing
+			// TODO: Remove the normalization codes once the following issue is fixed.
+			// Issue: https://github.com/Azure/azure-rest-api-specs/issues/22205
+			if id, err := parse.SpringCloudStorageIDInsensitively(*item.StorageID); err == nil {
 				storageName = id.StorageName
 			}
 		}
@@ -594,9 +599,34 @@ func flattenAppCustomPersistentDiskResourceArray(input *[]appplatform.CustomPers
 	return results
 }
 
-func flattenSpringCloudAppAddon(configs map[string]map[string]interface{}) *string {
+func flattenSpringCloudAppAddon(configs map[string]interface{}) *string {
 	if len(configs) == 0 {
 		return nil
+	}
+	// The returned value has inconsistent casing
+	// TODO: Remove the normalization codes once the following issue is fixed.
+	// Issue: https://github.com/Azure/azure-rest-api-specs/issues/22481
+	if raw, ok := configs["applicationConfigurationService"]; ok && raw != nil {
+		if applicationConfigurationService, ok := raw.(map[string]interface{}); ok && len(applicationConfigurationService) != 0 {
+			if resourceId, ok := applicationConfigurationService["resourceId"]; ok && resourceId != nil {
+				applicationConfigurationServiceId, err := parse.SpringCloudConfigurationServiceIDInsensitively(resourceId.(string))
+				if err == nil {
+					applicationConfigurationService["resourceId"] = applicationConfigurationServiceId.ID()
+					configs["applicationConfigurationService"] = applicationConfigurationService
+				}
+			}
+		}
+	}
+	if raw, ok := configs["serviceRegistry"]; ok && raw != nil {
+		if serviceRegistry, ok := raw.(map[string]interface{}); ok && len(serviceRegistry) != 0 {
+			if resourceId, ok := serviceRegistry["resourceId"]; ok && resourceId != nil {
+				serviceRegistryId, err := parse.SpringCloudServiceRegistryIDInsensitively(resourceId.(string))
+				if err == nil {
+					serviceRegistry["resourceId"] = serviceRegistryId.ID()
+					configs["serviceRegistry"] = serviceRegistry
+				}
+			}
+		}
 	}
 	addonConfig, _ := json.Marshal(configs)
 	return utils.String(string(addonConfig))

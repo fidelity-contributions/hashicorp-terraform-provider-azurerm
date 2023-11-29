@@ -7,6 +7,9 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = IscsiTargetId{}
 
 // IscsiTargetId is a struct representing the Resource ID for a Iscsi Target
@@ -35,23 +38,9 @@ func ParseIscsiTargetID(input string) (*IscsiTargetId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := IscsiTargetId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.DiskPoolName, ok = parsed.Parsed["diskPoolName"]; !ok {
-		return nil, fmt.Errorf("the segment 'diskPoolName' was not found in the resource id %q", input)
-	}
-
-	if id.IscsiTargetName, ok = parsed.Parsed["iscsiTargetName"]; !ok {
-		return nil, fmt.Errorf("the segment 'iscsiTargetName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -66,26 +55,34 @@ func ParseIscsiTargetIDInsensitively(input string) (*IscsiTargetId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := IscsiTargetId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.DiskPoolName, ok = parsed.Parsed["diskPoolName"]; !ok {
-		return nil, fmt.Errorf("the segment 'diskPoolName' was not found in the resource id %q", input)
-	}
-
-	if id.IscsiTargetName, ok = parsed.Parsed["iscsiTargetName"]; !ok {
-		return nil, fmt.Errorf("the segment 'iscsiTargetName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *IscsiTargetId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.ResourceGroupName, ok = input.Parsed["resourceGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroupName", input)
+	}
+
+	if id.DiskPoolName, ok = input.Parsed["diskPoolName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "diskPoolName", input)
+	}
+
+	if id.IscsiTargetName, ok = input.Parsed["iscsiTargetName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "iscsiTargetName", input)
+	}
+
+	return nil
 }
 
 // ValidateIscsiTargetID checks that 'input' can be parsed as a Iscsi Target ID

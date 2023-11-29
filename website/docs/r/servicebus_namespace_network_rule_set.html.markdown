@@ -10,6 +10,11 @@ description: |-
 
 Manages a ServiceBus Namespace Network Rule Set.
 
+
+> The `azurerm_servicebus_namespace_network_rule_set` resource is deprecated
+and will be removed in version 4.0 of the AzureRM provider. Please use
+`network_rule_set` inside the `azurerm_servicebus_namespace` resource instead.
+
 ## Example Usage
 
 ```hcl
@@ -71,11 +76,11 @@ The following arguments are supported:
 
 ~> **NOTE:** The ServiceBus Namespace must be `Premium` in order to attach a ServiceBus Namespace Network Rule Set.
 
-* `default_action` - (Optional) Specifies the default action for the ServiceBus Namespace Network Rule Set. Possible values are `Allow` and `Deny`. Defaults to `Deny`.
+* `default_action` - (Optional) Specifies the default action for the ServiceBus Namespace Network Rule Set. Possible values are `Allow` and `Deny`. Defaults to `Allow`.
 
 * `public_network_access_enabled` - (Optional) Whether to allow traffic over public network. Possible values are `true` and `false`. Defaults to `true`.
 
-* `trusted_services_allowed` - (Optional) If True, then Azure Services that are known and trusted for this resource type are allowed to bypass firewall configuration. See [Trusted Microsoft Services](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/service-bus-messaging/includes/service-bus-trusted-services.md)  
+* `trusted_services_allowed` - (Optional) If True, then Azure Services that are known and trusted for this resource type are allowed to bypass firewall configuration. See [Trusted Microsoft Services](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/service-bus-messaging/includes/service-bus-trusted-services.md) 
 
 * `ip_rules` - (Optional) One or more IP Addresses, or CIDR Blocks which should be able to access the ServiceBus Namespace.
 
@@ -91,7 +96,7 @@ A `network_rules` block supports the following:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the ServiceBus Namespace Network Rule Set.
 

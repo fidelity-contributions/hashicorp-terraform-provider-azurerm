@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package authorization
 
 import (
@@ -14,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/authorization/migration"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/authorization/parse"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
+	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/validation"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/timeouts"
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
 )
@@ -56,9 +60,10 @@ func resourceArmRoleDefinition() *pluginsdk.Resource {
 			},
 
 			"scope": {
-				Type:     pluginsdk.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         pluginsdk.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringStartsWithOneOf("/subscriptions/", "/providers/Microsoft.Management/managementGroups/"),
 			},
 
 			"description": {
@@ -340,7 +345,7 @@ func resourceArmRoleDefinitionDelete(d *pluginsdk.ResourceData, meta interface{}
 		},
 		Refresh:                   roleDefinitionDeleteStateRefreshFunc(ctx, client, id.ResourceID),
 		MinTimeout:                10 * time.Second,
-		ContinuousTargetOccurence: 10,
+		ContinuousTargetOccurence: 20,
 		Timeout:                   d.Timeout(pluginsdk.TimeoutDelete),
 	}
 
@@ -466,7 +471,9 @@ func expandRoleDefinitionAssignableScopes(d *pluginsdk.ResourceData) []string {
 		scopes = append(scopes, assignedScope)
 	} else {
 		for _, scope := range assignableScopes {
-			scopes = append(scopes, scope.(string))
+			if s, ok := scope.(string); ok {
+				scopes = append(scopes, s)
+			}
 		}
 	}
 

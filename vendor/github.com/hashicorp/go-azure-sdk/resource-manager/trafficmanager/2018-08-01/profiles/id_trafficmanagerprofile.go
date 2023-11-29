@@ -7,21 +7,24 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = TrafficManagerProfileId{}
 
 // TrafficManagerProfileId is a struct representing the Resource ID for a Traffic Manager Profile
 type TrafficManagerProfileId struct {
-	SubscriptionId    string
-	ResourceGroupName string
-	ProfileName       string
+	SubscriptionId            string
+	ResourceGroupName         string
+	TrafficManagerProfileName string
 }
 
 // NewTrafficManagerProfileID returns a new TrafficManagerProfileId struct
-func NewTrafficManagerProfileID(subscriptionId string, resourceGroupName string, profileName string) TrafficManagerProfileId {
+func NewTrafficManagerProfileID(subscriptionId string, resourceGroupName string, trafficManagerProfileName string) TrafficManagerProfileId {
 	return TrafficManagerProfileId{
-		SubscriptionId:    subscriptionId,
-		ResourceGroupName: resourceGroupName,
-		ProfileName:       profileName,
+		SubscriptionId:            subscriptionId,
+		ResourceGroupName:         resourceGroupName,
+		TrafficManagerProfileName: trafficManagerProfileName,
 	}
 }
 
@@ -33,19 +36,9 @@ func ParseTrafficManagerProfileID(input string) (*TrafficManagerProfileId, error
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := TrafficManagerProfileId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.ProfileName, ok = parsed.Parsed["profileName"]; !ok {
-		return nil, fmt.Errorf("the segment 'profileName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -60,22 +53,30 @@ func ParseTrafficManagerProfileIDInsensitively(input string) (*TrafficManagerPro
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := TrafficManagerProfileId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.ProfileName, ok = parsed.Parsed["profileName"]; !ok {
-		return nil, fmt.Errorf("the segment 'profileName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *TrafficManagerProfileId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.ResourceGroupName, ok = input.Parsed["resourceGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroupName", input)
+	}
+
+	if id.TrafficManagerProfileName, ok = input.Parsed["trafficManagerProfileName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "trafficManagerProfileName", input)
+	}
+
+	return nil
 }
 
 // ValidateTrafficManagerProfileID checks that 'input' can be parsed as a Traffic Manager Profile ID
@@ -96,7 +97,7 @@ func ValidateTrafficManagerProfileID(input interface{}, key string) (warnings []
 // ID returns the formatted Traffic Manager Profile ID
 func (id TrafficManagerProfileId) ID() string {
 	fmtString := "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/trafficManagerProfiles/%s"
-	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.ProfileName)
+	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.TrafficManagerProfileName)
 }
 
 // Segments returns a slice of Resource ID Segments which comprise this Traffic Manager Profile ID
@@ -109,7 +110,7 @@ func (id TrafficManagerProfileId) Segments() []resourceids.Segment {
 		resourceids.StaticSegment("staticProviders", "providers", "providers"),
 		resourceids.ResourceProviderSegment("staticMicrosoftNetwork", "Microsoft.Network", "Microsoft.Network"),
 		resourceids.StaticSegment("staticTrafficManagerProfiles", "trafficManagerProfiles", "trafficManagerProfiles"),
-		resourceids.UserSpecifiedSegment("profileName", "profileValue"),
+		resourceids.UserSpecifiedSegment("trafficManagerProfileName", "trafficManagerProfileValue"),
 	}
 }
 
@@ -118,7 +119,7 @@ func (id TrafficManagerProfileId) String() string {
 	components := []string{
 		fmt.Sprintf("Subscription: %q", id.SubscriptionId),
 		fmt.Sprintf("Resource Group Name: %q", id.ResourceGroupName),
-		fmt.Sprintf("Profile Name: %q", id.ProfileName),
+		fmt.Sprintf("Traffic Manager Profile Name: %q", id.TrafficManagerProfileName),
 	}
 	return fmt.Sprintf("Traffic Manager Profile (%s)", strings.Join(components, "\n"))
 }

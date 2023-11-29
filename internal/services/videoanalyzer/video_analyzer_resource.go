@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package videoanalyzer
 
 import (
@@ -13,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/azure"
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/tf"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
-	storageValidate "github.com/hashicorp/terraform-provider-azurerm/internal/services/storage/validate"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/videoanalyzer/validate"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/timeouts"
@@ -62,7 +64,7 @@ func resourceVideoAnalyzer() *pluginsdk.Resource {
 						"id": {
 							Type:         pluginsdk.TypeString,
 							Required:     true,
-							ValidateFunc: storageValidate.StorageAccountID,
+							ValidateFunc: commonids.ValidateStorageAccountID,
 						},
 
 						"user_assigned_identity_id": {
@@ -143,21 +145,20 @@ func resourceVideoAnalyzerRead(d *pluginsdk.ResourceData, meta interface{}) erro
 		return fmt.Errorf("retrieving %s: %+v", *id, err)
 	}
 
-	d.Set("name", id.AccountName)
+	d.Set("name", id.VideoAnalyzerName)
 	d.Set("resource_group_name", id.ResourceGroupName)
 
 	if model := resp.Model; model != nil {
 		d.Set("location", azure.NormalizeLocation(model.Location))
 
-		props := resp.Model.Properties
-		if props != nil {
+		if props := model.Properties; props != nil {
 			accounts := flattenVideoAnalyzerStorageAccounts(props.StorageAccounts)
 			if err := d.Set("storage_account", accounts); err != nil {
 				return fmt.Errorf("flattening `storage_account`: %s", err)
 			}
 		}
 
-		flattenedIdentity, err := flattenAzureRmVideoServiceIdentity(resp.Model.Identity)
+		flattenedIdentity, err := flattenAzureRmVideoServiceIdentity(model.Identity)
 		if err != nil {
 			return fmt.Errorf("flattening `identity`: %s", err)
 		}

@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package validate
 
 import (
@@ -5,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/services/redisenterprise/mgmt/2021-03-01/redisenterprise" // nolint: staticcheck
+	"github.com/hashicorp/go-azure-sdk/resource-manager/redisenterprise/2023-10-01-preview/redisenterprise"
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/azure"
 )
 
@@ -21,7 +24,7 @@ func RedisEnterpriseClusterSkuName(v interface{}, k string) (warnings []string, 
 	}
 
 	skuParts := strings.Split(value, "-")
-	validSkus := getValidRedisEnterpriseClusterSkus()
+	validSkus := redisenterprise.PossibleValuesForSkuName()
 	validValues := "2, 4, 6, ..."
 	// Validate the SKU Name section
 	for _, str := range validSkus {
@@ -64,16 +67,4 @@ func RedisEnterpriseClusterSkuName(v interface{}, k string) (warnings []string, 
 	}
 
 	return warnings, errors
-}
-
-func getValidRedisEnterpriseClusterSkus() []string {
-	return []string{
-		string(redisenterprise.EnterpriseE10),
-		string(redisenterprise.EnterpriseE20),
-		string(redisenterprise.EnterpriseE50),
-		string(redisenterprise.EnterpriseE100),
-		string(redisenterprise.EnterpriseFlashF300),
-		string(redisenterprise.EnterpriseFlashF700),
-		string(redisenterprise.EnterpriseFlashF1500),
-	}
 }

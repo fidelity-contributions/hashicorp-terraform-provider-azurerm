@@ -58,7 +58,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The Log Analytics Saved Search ID.
 
@@ -67,7 +67,6 @@ The following attributes are exported:
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/language/resources/syntax#operation-timeouts) for certain actions:
 
 * `create` - (Defaults to 30 minutes) Used when creating the Log Analytics Saved Search.
-* `update` - (Defaults to 30 minutes) Used when updating the Log Analytics Saved Search.
 * `read` - (Defaults to 5 minutes) Used when retrieving the Log Analytics Saved Search.
 * `delete` - (Defaults to 30 minutes) Used when deleting the Log Analytics Saved Search.
 

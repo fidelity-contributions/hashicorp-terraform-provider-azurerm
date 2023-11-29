@@ -59,7 +59,7 @@ The following arguments are supported:
 
 * `name` - (Required) The name which should be used for this Resource Group. Changing this forces a new Resource Group to be created.
 
-* `resource_group_name` - (Required) The name of the Resource Group where the Resource Group should exist.
+* `resource_group_name` - (Required) The name of the Resource Group where the Resource Group should exist. Changing this forces a new Resource Group to be created.
 
 ---
 
@@ -77,7 +77,7 @@ The following arguments are supported:
 
 * `password` - (Optional) Administrator password for the VMs that will be created as part of this cluster.
 
-* `sku` - (Optional) SKU for this cluster.  Changing this forces a new resource to be created. Default is `Basic`, allowed values are either `Basic` or `Standard`.
+* `sku` - (Optional) SKU for this cluster. Changing this forces a new resource to be created. Default is `Basic`, allowed values are either `Basic` or `Standard`.
 
 * `tags` - (Optional) A mapping of tags which should be assigned to the Resource Group.
 
@@ -171,7 +171,7 @@ A `node_type` block supports the following:
 
 * `capacities` - (Optional) Specifies a list of key/value pairs used to set capacity tags for this node type.
 
-* `data_disk_type` - (Optional) The type of the disk to use for storing data. It can be one of `Premium_LRS`, `Standard_LRS`, or `StandardSSD_LRS`.
+* `data_disk_type` - (Optional) The type of the disk to use for storing data. It can be one of `Premium_LRS`, `Standard_LRS`, or `StandardSSD_LRS`. Defaults to `Standard_LRS`.
 
 * `multiple_placement_groups_enabled` - (Optional) If set the node type can be composed of multiple placement groups.
 

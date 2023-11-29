@@ -75,6 +75,8 @@ The following arguments are supported:
 
 * `ddos_protection_plan` - (Optional) A `ddos_protection_plan` block as documented below.
 
+* `encryption` - (Optional) A `encryption` block as defined below.
+
 * `dns_servers` - (Optional) List of IP addresses of DNS servers
 
 -> **NOTE** Since `dns_servers` can be configured both inline and via the separate `azurerm_virtual_network_dns_servers` resource, we have to explicitly set it to empty slice (`[]`) to remove it.
@@ -99,9 +101,15 @@ A `ddos_protection_plan` block supports the following:
 
 ---
 
+A `encryption` block supports the following:
+
+* `enforcement` - (Required) Specifies if the encrypted Virtual Network allows VM that does not support encryption. Possible values are `DropUnencrypted` and `AllowUnencrypted`.
+
+---
+
 The `subnet` block supports:
 
-* `name` - (Required) The name of the subnet. Changing this forces a new resource to be created.
+* `name` - (Required) The name of the subnet.
 
 * `address_prefix` - (Required) The address prefix to use for the subnet.
 
@@ -109,21 +117,21 @@ The `subnet` block supports:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The virtual NetworkConfiguration ID.
 
-* `name` - (Required) The name of the virtual network.
+* `name` - (Required) The name of the virtual network. Changing this forces a new resource to be created.
 
 * `resource_group_name` - (Required) The name of the resource group in which to create the virtual network.
 
-* `location` - (Required) The location/region where the virtual network is created.
+* `location` - (Required) The location/region where the virtual network is created. Changing this forces a new resource to be created.
 
 * `address_space` - (Required) The list of address spaces used by the virtual network.
 
 * `guid` - The GUID of the virtual network.
 
-* `subnet` - (Optional) One or more `subnet` blocks as defined below.
+* `subnet` - One or more `subnet` blocks as defined below.
 
 ---
 

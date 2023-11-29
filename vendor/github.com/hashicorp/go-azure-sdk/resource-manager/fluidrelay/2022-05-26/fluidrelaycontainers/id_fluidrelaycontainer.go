@@ -7,6 +7,9 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = FluidRelayContainerId{}
 
 // FluidRelayContainerId is a struct representing the Resource ID for a Fluid Relay Container
@@ -35,23 +38,9 @@ func ParseFluidRelayContainerID(input string) (*FluidRelayContainerId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := FluidRelayContainerId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroup, ok = parsed.Parsed["resourceGroup"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroup' was not found in the resource id %q", input)
-	}
-
-	if id.FluidRelayServerName, ok = parsed.Parsed["fluidRelayServerName"]; !ok {
-		return nil, fmt.Errorf("the segment 'fluidRelayServerName' was not found in the resource id %q", input)
-	}
-
-	if id.FluidRelayContainerName, ok = parsed.Parsed["fluidRelayContainerName"]; !ok {
-		return nil, fmt.Errorf("the segment 'fluidRelayContainerName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -66,26 +55,34 @@ func ParseFluidRelayContainerIDInsensitively(input string) (*FluidRelayContainer
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := FluidRelayContainerId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroup, ok = parsed.Parsed["resourceGroup"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroup' was not found in the resource id %q", input)
-	}
-
-	if id.FluidRelayServerName, ok = parsed.Parsed["fluidRelayServerName"]; !ok {
-		return nil, fmt.Errorf("the segment 'fluidRelayServerName' was not found in the resource id %q", input)
-	}
-
-	if id.FluidRelayContainerName, ok = parsed.Parsed["fluidRelayContainerName"]; !ok {
-		return nil, fmt.Errorf("the segment 'fluidRelayContainerName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *FluidRelayContainerId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.ResourceGroup, ok = input.Parsed["resourceGroup"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroup", input)
+	}
+
+	if id.FluidRelayServerName, ok = input.Parsed["fluidRelayServerName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "fluidRelayServerName", input)
+	}
+
+	if id.FluidRelayContainerName, ok = input.Parsed["fluidRelayContainerName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "fluidRelayContainerName", input)
+	}
+
+	return nil
 }
 
 // ValidateFluidRelayContainerID checks that 'input' can be parsed as a Fluid Relay Container ID

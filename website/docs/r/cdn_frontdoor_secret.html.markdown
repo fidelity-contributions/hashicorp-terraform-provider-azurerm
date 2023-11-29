@@ -12,7 +12,11 @@ Manages a Front Door (standard/premium) Secret.
 
 ## Required Key Vault Permissions
 
-!>**IMPORTANT:** You must add an `Access Policy` to your `azurerm_key_vault` for the `Microsoft.Azure.Cdn` Enterprise Application Object ID.
+!>**IMPORTANT:** You must add an `Access Policy` to your `azurerm_key_vault` for the `Microsoft.AzurefrontDoor-Cdn` Enterprise Application Object ID.
+
+This can be created by running Az Powershell command like this:
+
+```New-AzADServicePrincipal -ApplicationId "00000000-0000-0000-0000-000000000000"```
 
 | Object ID                                | Key Permissions | Secret Permissions   | Certificate Permissions                       |
 |:-----------------------------------------|:---------------:|:--------------------:|:---------------------------------------------:|
@@ -28,6 +32,11 @@ Manages a Front Door (standard/premium) Secret.
 data "azurerm_client_config" "current" {}
 data "azuread_service_principal" "frontdoor" {
   display_name = "Microsoft.Azure.Cdn"
+}
+
+resource "azurerm_resource_group" "example" {
+  name     = "example-cdn-frontdoor"
+  location = "West Europe"
 }
 
 resource "azurerm_key_vault" "example" {
@@ -74,20 +83,26 @@ resource "azurerm_key_vault" "example" {
 
 resource "azurerm_key_vault_certificate" "example" {
   name         = "example-cert"
-  key_vault_id = azurerm_key_vault.test.id
+  key_vault_id = azurerm_key_vault.example.id
 
   certificate {
     contents = filebase64("my-certificate.pfx")
   }
 }
 
+resource "azurerm_cdn_frontdoor_profile" "example" {
+  name                = "example-cdn-profile"
+  resource_group_name = azurerm_resource_group.example.name
+  sku_name            = "Standard_AzureFrontDoor"
+}
+
 resource "azurerm_cdn_frontdoor_secret" "example" {
   name                     = "example-customer-managed-secret"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.test.id
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.example.id
 
   secret {
     customer_certificate {
-      key_vault_certificate_id = azurerm_key_vault_certificate.test.id
+      key_vault_certificate_id = azurerm_key_vault_certificate.example.id
     }
   }
 }

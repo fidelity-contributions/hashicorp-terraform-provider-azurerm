@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package disks
 
 import (
@@ -9,7 +12,6 @@ import (
 
 	"github.com/hashicorp/go-azure-helpers/lang/response"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/storagepool/2021-08-01/iscsitargets"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/locks"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/sdk"
@@ -148,9 +150,9 @@ func (d DisksPoolIscsiTargetResource) Create() sdk.ResourceFunc {
 				return fmt.Errorf("could not retrieve context deadline for %s", id.ID())
 			}
 			//lintignore:R006
-			return pluginsdk.Retry(time.Until(deadline), func() *resource.RetryError {
+			return pluginsdk.Retry(time.Until(deadline), func() *pluginsdk.RetryError {
 				//lintignore:R006
-				if err := d.retryError("waiting for creation DisksPool iscsi target", id.ID(), future.Poller.PollUntilDone()); err != nil {
+				if err := d.retryError("waiting for creation DisksPool iscsi target", id.ID(), future.Poller.PollUntilDone(ctx)); err != nil {
 					return err
 				}
 				metadata.SetID(id)
@@ -219,8 +221,8 @@ func (d DisksPoolIscsiTargetResource) Delete() sdk.ResourceFunc {
 				return fmt.Errorf("could not retrieve context deadline for %s", id)
 			}
 			//lintignore:R006
-			return pluginsdk.Retry(time.Until(deadline), func() *resource.RetryError {
-				return d.retryError("waiting for deletion of DisksPool iscsi target", id.ID(), future.Poller.PollUntilDone())
+			return pluginsdk.Retry(time.Until(deadline), func() *pluginsdk.RetryError {
+				return d.retryError("waiting for deletion of DisksPool iscsi target", id.ID(), future.Poller.PollUntilDone(ctx))
 			})
 		},
 	}
@@ -230,7 +232,7 @@ func (d DisksPoolIscsiTargetResource) IDValidationFunc() pluginsdk.SchemaValidat
 	return iscsitargets.ValidateIscsiTargetID
 }
 
-func (DisksPoolIscsiTargetResource) retryError(action string, id string, err error) *resource.RetryError {
+func (DisksPoolIscsiTargetResource) retryError(action string, id string, err error) *pluginsdk.RetryError {
 	if err == nil {
 		return nil
 	}

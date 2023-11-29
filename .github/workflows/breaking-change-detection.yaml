@@ -1,0 +1,29 @@
+---
+name: Breaking Schema Changes
+
+permissions:
+  contents: read
+  pull-requests: read
+
+
+on:
+  pull_request:
+    types: ['opened', 'synchronize']
+    paths:
+      - '.github/workflows/breaking-change-detection.yaml'
+      - 'vendor/**'
+      - 'internal/**.go'
+
+concurrency:
+  group: 'breakingChange-${{ github.head_ref }}'
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    runs-on: [custom, linux, small]
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+        with:
+          go-version-file: ./.go-version
+      - run: bash ./scripts/run-breaking-change-detection.sh

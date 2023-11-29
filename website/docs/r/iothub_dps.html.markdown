@@ -85,13 +85,13 @@ An `ip_filter_rule` block supports the following:
 
 * `ip_mask` - (Required) The IP address range in CIDR notation for the rule.
 
-* `action` - (Required) The desired action for requests captured by this rule. Possible values are  `Accept`, `Reject`
+* `action` - (Required) The desired action for requests captured by this rule. Possible values are `Accept`, `Reject`
 
-* `target` - (Optional) Target for requests captured by this rule. Possible values are `All`, `DeviceApi` and `ServiceApi`.
+* `target` - (Optional) Target for requests captured by this rule. Possible values are `all`, `deviceApi` and `serviceApi`.
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the IoT Device Provisioning Service.
 

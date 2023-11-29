@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package sql
 
 import (
@@ -12,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/tf"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/sql/parse"
+	"github.com/hashicorp/terraform-provider-azurerm/internal/services/sql/validate"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/validation"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/timeouts"
@@ -20,7 +24,7 @@ import (
 
 func resourceArmSqlManagedDatabase() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceArmSqlManagedDatabaseCreateUpdate,
+		Create: resourceArmSqlManagedDatabaseCreate,
 		Read:   resourceArmSqlManagedDatabaseRead,
 		Delete: resourceArmSqlManagedDatabaseDelete,
 
@@ -34,7 +38,6 @@ func resourceArmSqlManagedDatabase() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(24 * time.Hour),
 			Read:   schema.DefaultTimeout(5 * time.Minute),
-			Update: schema.DefaultTimeout(24 * time.Hour),
 			Delete: schema.DefaultTimeout(24 * time.Hour),
 		},
 
@@ -52,13 +55,13 @@ func resourceArmSqlManagedDatabase() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: azure.ValidateResourceID,
+				ValidateFunc: validate.ManagedInstanceID,
 			},
 		},
 	}
 }
 
-func resourceArmSqlManagedDatabaseCreateUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceArmSqlManagedDatabaseCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*clients.Client).Sql.ManagedDatabasesClient
 	ctx, cancel := timeouts.ForCreateUpdate(meta.(*clients.Client).StopContext, d)
 	defer cancel()

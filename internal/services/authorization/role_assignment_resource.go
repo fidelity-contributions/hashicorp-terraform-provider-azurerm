@@ -1,14 +1,19 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package authorization
 
 import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/preview/authorization/mgmt/2020-04-01-preview/authorization" // nolint: staticcheck
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2021-01-01/subscriptions"                     // nolint: staticcheck
+	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonids"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/azure"
@@ -39,7 +44,6 @@ func resourceArmRoleAssignment() *pluginsdk.Resource {
 		Timeouts: &pluginsdk.ResourceTimeout{
 			Create: pluginsdk.DefaultTimeout(30 * time.Minute),
 			Read:   pluginsdk.DefaultTimeout(5 * time.Minute),
-			Update: pluginsdk.DefaultTimeout(30 * time.Minute),
 			Delete: pluginsdk.DefaultTimeout(30 * time.Minute),
 		},
 
@@ -60,9 +64,7 @@ func resourceArmRoleAssignment() *pluginsdk.Resource {
 					// Elevated access for a global admin is needed to assign roles in this scope:
 					// https://docs.microsoft.com/en-us/azure/role-based-access-control/elevate-access-global-admin#azure-cli
 					// It seems only user account is allowed to be elevated access.
-					validation.StringInSlice([]string{
-						"/providers/Microsoft.Subscription",
-					}, false),
+					validation.StringMatch(regexp.MustCompile("/providers/Microsoft.Subscription.*"), "Subscription scope is invalid"),
 
 					billingValidate.EnrollmentID,
 					commonids.ValidateManagementGroupID,
@@ -272,7 +274,7 @@ func resourceArmRoleAssignmentRead(d *pluginsdk.ResourceData, meta interface{}) 
 	d.Set("name", resp.Name)
 
 	if props := resp.RoleAssignmentPropertiesWithScope; props != nil {
-		d.Set("scope", props.Scope)
+		d.Set("scope", normalizeScopeValue(pointer.From(props.Scope)))
 		d.Set("role_definition_id", props.RoleDefinitionID)
 		d.Set("principal_id", props.PrincipalID)
 		d.Set("principal_type", props.PrincipalType)
@@ -410,4 +412,13 @@ func getTenantIdBySubscriptionId(ctx context.Context, client *subscriptions.Clie
 		return "", fmt.Errorf("tenant Id is nil by Subscription %s: %+v", subscriptionId, resp)
 	}
 	return *resp.TenantID, nil
+}
+
+func normalizeScopeValue(scope string) (result string) {
+	if rg, err := commonids.ParseResourceGroupIDInsensitively(scope); err == nil {
+		return rg.ID()
+	}
+	// only check part of IDs, there are may be other specific resource types, like storage account id
+	// we may need append these parse logics below when needed
+	return scope
 }

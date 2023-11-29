@@ -7,23 +7,26 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = AccountFilterId{}
 
 // AccountFilterId is a struct representing the Resource ID for a Account Filter
 type AccountFilterId struct {
 	SubscriptionId    string
 	ResourceGroupName string
-	AccountName       string
-	FilterName        string
+	MediaServiceName  string
+	AccountFilterName string
 }
 
 // NewAccountFilterID returns a new AccountFilterId struct
-func NewAccountFilterID(subscriptionId string, resourceGroupName string, accountName string, filterName string) AccountFilterId {
+func NewAccountFilterID(subscriptionId string, resourceGroupName string, mediaServiceName string, accountFilterName string) AccountFilterId {
 	return AccountFilterId{
 		SubscriptionId:    subscriptionId,
 		ResourceGroupName: resourceGroupName,
-		AccountName:       accountName,
-		FilterName:        filterName,
+		MediaServiceName:  mediaServiceName,
+		AccountFilterName: accountFilterName,
 	}
 }
 
@@ -35,23 +38,9 @@ func ParseAccountFilterID(input string) (*AccountFilterId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := AccountFilterId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.AccountName, ok = parsed.Parsed["accountName"]; !ok {
-		return nil, fmt.Errorf("the segment 'accountName' was not found in the resource id %q", input)
-	}
-
-	if id.FilterName, ok = parsed.Parsed["filterName"]; !ok {
-		return nil, fmt.Errorf("the segment 'filterName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -66,26 +55,34 @@ func ParseAccountFilterIDInsensitively(input string) (*AccountFilterId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := AccountFilterId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.AccountName, ok = parsed.Parsed["accountName"]; !ok {
-		return nil, fmt.Errorf("the segment 'accountName' was not found in the resource id %q", input)
-	}
-
-	if id.FilterName, ok = parsed.Parsed["filterName"]; !ok {
-		return nil, fmt.Errorf("the segment 'filterName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *AccountFilterId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.ResourceGroupName, ok = input.Parsed["resourceGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroupName", input)
+	}
+
+	if id.MediaServiceName, ok = input.Parsed["mediaServiceName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "mediaServiceName", input)
+	}
+
+	if id.AccountFilterName, ok = input.Parsed["accountFilterName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "accountFilterName", input)
+	}
+
+	return nil
 }
 
 // ValidateAccountFilterID checks that 'input' can be parsed as a Account Filter ID
@@ -106,7 +103,7 @@ func ValidateAccountFilterID(input interface{}, key string) (warnings []string, 
 // ID returns the formatted Account Filter ID
 func (id AccountFilterId) ID() string {
 	fmtString := "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Media/mediaServices/%s/accountFilters/%s"
-	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.AccountName, id.FilterName)
+	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.MediaServiceName, id.AccountFilterName)
 }
 
 // Segments returns a slice of Resource ID Segments which comprise this Account Filter ID
@@ -119,9 +116,9 @@ func (id AccountFilterId) Segments() []resourceids.Segment {
 		resourceids.StaticSegment("staticProviders", "providers", "providers"),
 		resourceids.ResourceProviderSegment("staticMicrosoftMedia", "Microsoft.Media", "Microsoft.Media"),
 		resourceids.StaticSegment("staticMediaServices", "mediaServices", "mediaServices"),
-		resourceids.UserSpecifiedSegment("accountName", "accountValue"),
+		resourceids.UserSpecifiedSegment("mediaServiceName", "mediaServiceValue"),
 		resourceids.StaticSegment("staticAccountFilters", "accountFilters", "accountFilters"),
-		resourceids.UserSpecifiedSegment("filterName", "filterValue"),
+		resourceids.UserSpecifiedSegment("accountFilterName", "accountFilterValue"),
 	}
 }
 
@@ -130,8 +127,8 @@ func (id AccountFilterId) String() string {
 	components := []string{
 		fmt.Sprintf("Subscription: %q", id.SubscriptionId),
 		fmt.Sprintf("Resource Group Name: %q", id.ResourceGroupName),
-		fmt.Sprintf("Account Name: %q", id.AccountName),
-		fmt.Sprintf("Filter Name: %q", id.FilterName),
+		fmt.Sprintf("Media Service Name: %q", id.MediaServiceName),
+		fmt.Sprintf("Account Filter Name: %q", id.AccountFilterName),
 	}
 	return fmt.Sprintf("Account Filter (%s)", strings.Join(components, "\n"))
 }

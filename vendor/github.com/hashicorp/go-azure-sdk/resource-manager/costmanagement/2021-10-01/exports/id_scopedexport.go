@@ -7,6 +7,9 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = ScopedExportId{}
 
 // ScopedExportId is a struct representing the Resource ID for a Scoped Export
@@ -31,15 +34,9 @@ func ParseScopedExportID(input string) (*ScopedExportId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := ScopedExportId{}
-
-	if id.Scope, ok = parsed.Parsed["scope"]; !ok {
-		return nil, fmt.Errorf("the segment 'scope' was not found in the resource id %q", input)
-	}
-
-	if id.ExportName, ok = parsed.Parsed["exportName"]; !ok {
-		return nil, fmt.Errorf("the segment 'exportName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -54,18 +51,26 @@ func ParseScopedExportIDInsensitively(input string) (*ScopedExportId, error) {
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := ScopedExportId{}
-
-	if id.Scope, ok = parsed.Parsed["scope"]; !ok {
-		return nil, fmt.Errorf("the segment 'scope' was not found in the resource id %q", input)
-	}
-
-	if id.ExportName, ok = parsed.Parsed["exportName"]; !ok {
-		return nil, fmt.Errorf("the segment 'exportName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *ScopedExportId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.Scope, ok = input.Parsed["scope"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "scope", input)
+	}
+
+	if id.ExportName, ok = input.Parsed["exportName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "exportName", input)
+	}
+
+	return nil
 }
 
 // ValidateScopedExportID checks that 'input' can be parsed as a Scoped Export ID

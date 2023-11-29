@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package appservice
 
 import (
@@ -7,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/services/web/mgmt/2021-02-01/web" // nolint: staticcheck
+	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonschema"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/location"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/sdk"
@@ -17,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tags"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
+	"github.com/tombuildsstuff/kermit/sdk/web/2022-09-01/web"
 )
 
 type WindowsFunctionAppDataSource struct{}
@@ -32,26 +36,31 @@ type WindowsFunctionAppDataSourceModel struct {
 	StorageUsesMSI          bool   `tfschema:"storage_uses_managed_identity"`
 	StorageKeyVaultSecretID string `tfschema:"storage_key_vault_secret_id"`
 
-	AppSettings               map[string]string                      `tfschema:"app_settings"`
-	AuthSettings              []helpers.AuthSettings                 `tfschema:"auth_settings"`
-	Backup                    []helpers.Backup                       `tfschema:"backup"`
-	BuiltinLogging            bool                                   `tfschema:"builtin_logging_enabled"`
-	ClientCertEnabled         bool                                   `tfschema:"client_certificate_enabled"`
-	ClientCertMode            string                                 `tfschema:"client_certificate_mode"`
-	ClientCertExclusionPaths  string                                 `tfschema:"client_certificate_exclusion_paths"`
-	ConnectionStrings         []helpers.ConnectionString             `tfschema:"connection_string"`
-	DailyMemoryTimeQuota      int                                    `tfschema:"daily_memory_time_quota"`
-	Enabled                   bool                                   `tfschema:"enabled"`
-	FunctionExtensionsVersion string                                 `tfschema:"functions_extension_version"`
-	ForceDisableContentShare  bool                                   `tfschema:"content_share_force_disabled"`
-	HttpsOnly                 bool                                   `tfschema:"https_only"`
-	SiteConfig                []helpers.SiteConfigWindowsFunctionApp `tfschema:"site_config"`
-	StickySettings            []helpers.StickySettings               `tfschema:"sticky_settings"`
-	Tags                      map[string]string                      `tfschema:"tags"`
-	VirtualNetworkSubnetId    string                                 `tfschema:"virtual_network_subnet_id"`
+	AppSettings                      map[string]string                      `tfschema:"app_settings"`
+	AuthSettings                     []helpers.AuthSettings                 `tfschema:"auth_settings"`
+	AuthV2Settings                   []helpers.AuthV2Settings               `tfschema:"auth_settings_v2"`
+	Backup                           []helpers.Backup                       `tfschema:"backup"`
+	BuiltinLogging                   bool                                   `tfschema:"builtin_logging_enabled"`
+	ClientCertEnabled                bool                                   `tfschema:"client_certificate_enabled"`
+	ClientCertMode                   string                                 `tfschema:"client_certificate_mode"`
+	ClientCertExclusionPaths         string                                 `tfschema:"client_certificate_exclusion_paths"`
+	ConnectionStrings                []helpers.ConnectionString             `tfschema:"connection_string"`
+	DailyMemoryTimeQuota             int                                    `tfschema:"daily_memory_time_quota"`
+	Enabled                          bool                                   `tfschema:"enabled"`
+	FunctionExtensionsVersion        string                                 `tfschema:"functions_extension_version"`
+	ForceDisableContentShare         bool                                   `tfschema:"content_share_force_disabled"`
+	HttpsOnly                        bool                                   `tfschema:"https_only"`
+	PublicNetworkAccess              bool                                   `tfschema:"public_network_access_enabled"`
+	PublishingDeployBasicAuthEnabled bool                                   `tfschema:"webdeploy_publish_basic_authentication_enabled"`
+	PublishingFTPBasicAuthEnabled    bool                                   `tfschema:"ftp_publish_basic_authentication_enabled"`
+	SiteConfig                       []helpers.SiteConfigWindowsFunctionApp `tfschema:"site_config"`
+	StickySettings                   []helpers.StickySettings               `tfschema:"sticky_settings"`
+	Tags                             map[string]string                      `tfschema:"tags"`
+	VirtualNetworkSubnetId           string                                 `tfschema:"virtual_network_subnet_id"`
 
 	CustomDomainVerificationId    string   `tfschema:"custom_domain_verification_id"`
 	DefaultHostname               string   `tfschema:"default_hostname"`
+	HostingEnvId                  string   `tfschema:"hosting_environment_id"`
 	Kind                          string   `tfschema:"kind"`
 	OutboundIPAddresses           string   `tfschema:"outbound_ip_addresses"`
 	OutboundIPAddressList         []string `tfschema:"outbound_ip_address_list"`
@@ -123,6 +132,8 @@ func (d WindowsFunctionAppDataSource) Attributes() map[string]*pluginsdk.Schema 
 
 		"auth_settings": helpers.AuthSettingsSchemaComputed(),
 
+		"auth_settings_v2": helpers.AuthV2SettingsComputedSchema(),
+
 		"backup": helpers.BackupSchemaComputed(),
 
 		"builtin_logging_enabled": {
@@ -184,6 +195,11 @@ func (d WindowsFunctionAppDataSource) Attributes() map[string]*pluginsdk.Schema 
 			Computed: true,
 		},
 
+		"hosting_environment_id": {
+			Type:     pluginsdk.TypeString,
+			Computed: true,
+		},
+
 		"kind": {
 			Type:     pluginsdk.TypeString,
 			Computed: true,
@@ -215,7 +231,22 @@ func (d WindowsFunctionAppDataSource) Attributes() map[string]*pluginsdk.Schema 
 			},
 		},
 
+		"public_network_access_enabled": {
+			Type:     pluginsdk.TypeBool,
+			Computed: true,
+		},
+
 		"site_credential": helpers.SiteCredentialSchema(),
+
+		"webdeploy_publish_basic_authentication_enabled": {
+			Type:     pluginsdk.TypeBool,
+			Computed: true,
+		},
+
+		"ftp_publish_basic_authentication_enabled": {
+			Type:     pluginsdk.TypeBool,
+			Computed: true,
+		},
 
 		"site_config": helpers.SiteConfigSchemaWindowsFunctionAppComputed(),
 
@@ -272,6 +303,28 @@ func (d WindowsFunctionAppDataSource) Read() sdk.ResourceFunc {
 			functionApp.CustomDomainVerificationId = utils.NormalizeNilableString(props.CustomDomainVerificationID)
 			functionApp.DefaultHostname = utils.NormalizeNilableString(props.DefaultHostName)
 			functionApp.VirtualNetworkSubnetId = utils.NormalizeNilableString(props.VirtualNetworkSubnetID)
+			functionApp.PublicNetworkAccess = !strings.EqualFold(pointer.From(props.PublicNetworkAccess), helpers.PublicNetworkAccessDisabled)
+
+			basicAuthFTP := true
+			if basicAuthFTPResp, err := client.GetFtpAllowed(ctx, id.ResourceGroup, id.SiteName); err != nil {
+				return fmt.Errorf("retrieving state of FTP Basic Auth for %s: %+v", id, err)
+			} else if csmProps := basicAuthFTPResp.CsmPublishingCredentialsPoliciesEntityProperties; csmProps != nil {
+				basicAuthFTP = pointer.From(csmProps.Allow)
+			}
+
+			basicAuthWebDeploy := true
+			if basicAuthWebDeployResp, err := client.GetScmAllowed(ctx, id.ResourceGroup, id.SiteName); err != nil {
+				return fmt.Errorf("retrieving state of WebDeploy Basic Auth for %s: %+v", id, err)
+			} else if csmProps := basicAuthWebDeployResp.CsmPublishingCredentialsPoliciesEntityProperties; csmProps != nil {
+				basicAuthWebDeploy = pointer.From(csmProps.Allow)
+			}
+
+			functionApp.PublishingFTPBasicAuthEnabled = basicAuthFTP
+			functionApp.PublishingDeployBasicAuthEnabled = basicAuthWebDeploy
+
+			if hostingEnv := props.HostingEnvironmentProfile; hostingEnv != nil {
+				functionApp.HostingEnvId = pointer.From(hostingEnv.ID)
+			}
 
 			if v := props.OutboundIPAddresses; v != nil {
 				functionApp.OutboundIPAddresses = *v
@@ -295,7 +348,7 @@ func (d WindowsFunctionAppDataSource) Read() sdk.ResourceFunc {
 
 			stickySettings, err := client.ListSlotConfigurationNames(ctx, id.ResourceGroup, id.SiteName)
 			if err != nil {
-				return fmt.Errorf("reading Sticky Settings for Linux %s: %+v", id, err)
+				return fmt.Errorf("reading Sticky Settings for Windows %s: %+v", id, err)
 			}
 
 			siteCredentialsFuture, err := client.ListPublishingCredentials(ctx, id.ResourceGroup, id.SiteName)
@@ -314,6 +367,11 @@ func (d WindowsFunctionAppDataSource) Read() sdk.ResourceFunc {
 			auth, err := client.GetAuthSettings(ctx, id.ResourceGroup, id.SiteName)
 			if err != nil {
 				return fmt.Errorf("reading Auth Settings for Windows %s: %+v", id, err)
+			}
+
+			authV2, err := client.GetAuthSettingsV2(ctx, id.ResourceGroup, id.SiteName)
+			if err != nil {
+				return fmt.Errorf("reading authV2 settings for Windows %s: %+v", id, err)
 			}
 
 			backup, err := client.GetBackupConfiguration(ctx, id.ResourceGroup, id.SiteName)
@@ -347,6 +405,8 @@ func (d WindowsFunctionAppDataSource) Read() sdk.ResourceFunc {
 			functionApp.SiteCredentials = helpers.FlattenSiteCredentials(siteCredentials)
 
 			functionApp.AuthSettings = helpers.FlattenAuthSettings(auth)
+
+			functionApp.AuthV2Settings = helpers.FlattenAuthV2Settings(authV2)
 
 			functionApp.Backup = helpers.FlattenBackupConfig(backup)
 

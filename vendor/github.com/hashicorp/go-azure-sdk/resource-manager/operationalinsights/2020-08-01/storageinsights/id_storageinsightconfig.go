@@ -7,23 +7,26 @@ import (
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/resourceids"
 )
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See NOTICE.txt in the project root for license information.
+
 var _ resourceids.ResourceId = StorageInsightConfigId{}
 
 // StorageInsightConfigId is a struct representing the Resource ID for a Storage Insight Config
 type StorageInsightConfigId struct {
-	SubscriptionId     string
-	ResourceGroupName  string
-	WorkspaceName      string
-	StorageInsightName string
+	SubscriptionId           string
+	ResourceGroupName        string
+	WorkspaceName            string
+	StorageInsightConfigName string
 }
 
 // NewStorageInsightConfigID returns a new StorageInsightConfigId struct
-func NewStorageInsightConfigID(subscriptionId string, resourceGroupName string, workspaceName string, storageInsightName string) StorageInsightConfigId {
+func NewStorageInsightConfigID(subscriptionId string, resourceGroupName string, workspaceName string, storageInsightConfigName string) StorageInsightConfigId {
 	return StorageInsightConfigId{
-		SubscriptionId:     subscriptionId,
-		ResourceGroupName:  resourceGroupName,
-		WorkspaceName:      workspaceName,
-		StorageInsightName: storageInsightName,
+		SubscriptionId:           subscriptionId,
+		ResourceGroupName:        resourceGroupName,
+		WorkspaceName:            workspaceName,
+		StorageInsightConfigName: storageInsightConfigName,
 	}
 }
 
@@ -35,23 +38,9 @@ func ParseStorageInsightConfigID(input string) (*StorageInsightConfigId, error) 
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := StorageInsightConfigId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.WorkspaceName, ok = parsed.Parsed["workspaceName"]; !ok {
-		return nil, fmt.Errorf("the segment 'workspaceName' was not found in the resource id %q", input)
-	}
-
-	if id.StorageInsightName, ok = parsed.Parsed["storageInsightName"]; !ok {
-		return nil, fmt.Errorf("the segment 'storageInsightName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
@@ -66,26 +55,34 @@ func ParseStorageInsightConfigIDInsensitively(input string) (*StorageInsightConf
 		return nil, fmt.Errorf("parsing %q: %+v", input, err)
 	}
 
-	var ok bool
 	id := StorageInsightConfigId{}
-
-	if id.SubscriptionId, ok = parsed.Parsed["subscriptionId"]; !ok {
-		return nil, fmt.Errorf("the segment 'subscriptionId' was not found in the resource id %q", input)
-	}
-
-	if id.ResourceGroupName, ok = parsed.Parsed["resourceGroupName"]; !ok {
-		return nil, fmt.Errorf("the segment 'resourceGroupName' was not found in the resource id %q", input)
-	}
-
-	if id.WorkspaceName, ok = parsed.Parsed["workspaceName"]; !ok {
-		return nil, fmt.Errorf("the segment 'workspaceName' was not found in the resource id %q", input)
-	}
-
-	if id.StorageInsightName, ok = parsed.Parsed["storageInsightName"]; !ok {
-		return nil, fmt.Errorf("the segment 'storageInsightName' was not found in the resource id %q", input)
+	if err := id.FromParseResult(*parsed); err != nil {
+		return nil, err
 	}
 
 	return &id, nil
+}
+
+func (id *StorageInsightConfigId) FromParseResult(input resourceids.ParseResult) error {
+	var ok bool
+
+	if id.SubscriptionId, ok = input.Parsed["subscriptionId"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "subscriptionId", input)
+	}
+
+	if id.ResourceGroupName, ok = input.Parsed["resourceGroupName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "resourceGroupName", input)
+	}
+
+	if id.WorkspaceName, ok = input.Parsed["workspaceName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "workspaceName", input)
+	}
+
+	if id.StorageInsightConfigName, ok = input.Parsed["storageInsightConfigName"]; !ok {
+		return resourceids.NewSegmentNotSpecifiedError(id, "storageInsightConfigName", input)
+	}
+
+	return nil
 }
 
 // ValidateStorageInsightConfigID checks that 'input' can be parsed as a Storage Insight Config ID
@@ -106,7 +103,7 @@ func ValidateStorageInsightConfigID(input interface{}, key string) (warnings []s
 // ID returns the formatted Storage Insight Config ID
 func (id StorageInsightConfigId) ID() string {
 	fmtString := "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.OperationalInsights/workspaces/%s/storageInsightConfigs/%s"
-	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.WorkspaceName, id.StorageInsightName)
+	return fmt.Sprintf(fmtString, id.SubscriptionId, id.ResourceGroupName, id.WorkspaceName, id.StorageInsightConfigName)
 }
 
 // Segments returns a slice of Resource ID Segments which comprise this Storage Insight Config ID
@@ -121,7 +118,7 @@ func (id StorageInsightConfigId) Segments() []resourceids.Segment {
 		resourceids.StaticSegment("staticWorkspaces", "workspaces", "workspaces"),
 		resourceids.UserSpecifiedSegment("workspaceName", "workspaceValue"),
 		resourceids.StaticSegment("staticStorageInsightConfigs", "storageInsightConfigs", "storageInsightConfigs"),
-		resourceids.UserSpecifiedSegment("storageInsightName", "storageInsightValue"),
+		resourceids.UserSpecifiedSegment("storageInsightConfigName", "storageInsightConfigValue"),
 	}
 }
 
@@ -131,7 +128,7 @@ func (id StorageInsightConfigId) String() string {
 		fmt.Sprintf("Subscription: %q", id.SubscriptionId),
 		fmt.Sprintf("Resource Group Name: %q", id.ResourceGroupName),
 		fmt.Sprintf("Workspace Name: %q", id.WorkspaceName),
-		fmt.Sprintf("Storage Insight Name: %q", id.StorageInsightName),
+		fmt.Sprintf("Storage Insight Config Name: %q", id.StorageInsightConfigName),
 	}
 	return fmt.Sprintf("Storage Insight Config (%s)", strings.Join(components, "\n"))
 }

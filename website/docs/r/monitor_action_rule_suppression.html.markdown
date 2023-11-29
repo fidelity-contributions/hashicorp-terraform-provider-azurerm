@@ -8,7 +8,9 @@ description: |-
 
 # azurerm_monitor_action_rule_suppression
 
-Manages an Monitor Action Rule which type is suppression.
+Manages a Monitor Action Rule which type is suppression.
+
+!> **NOTE:** This resource has been deprecated in version 3.0 of the AzureRM provider and will be removed in version 4.0. Please use [`azurerm_monitor_alert_processing_rule_suppression`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_alert_processing_rule_suppression) resource instead.
 
 ## Example Usage
 
@@ -79,7 +81,7 @@ The `schedule` block supports the following:
 
 * `end_date_utc` - (Required) specifies the recurrence UTC end datetime (Y-m-d'T'H:M:S'Z').
 
-* `recurrence_weekly` - (Optional) specifies the list of dayOfWeek to recurrence. Possible values are `Sunday`, `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday` and  `Saturday`.
+* `recurrence_weekly` - (Optional) specifies the list of dayOfWeek to recurrence. Possible values are `Sunday`, `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday` and `Saturday`.
 
 * `recurrence_monthly` - (Optional) specifies the list of dayOfMonth to recurrence. Possible values are between `1` - `31`. Required if `recurrence_type` is `Monthly`.
 
@@ -103,7 +105,7 @@ The `condition` block supports the following:
 
 * `monitor` - (Optional) A `monitor` block as defined below.
 
-* `monitor_service` - (Optional) A `monitor_service` as block defined below.
+* `monitor_service` - (Optional) A `monitor_service` block as defined below.
 
 * `severity` - (Optional) A `severity` block as defined below.
 
@@ -169,7 +171,7 @@ The `target_resource_type` block supports the following:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Monitor Action Rule.
 

@@ -54,7 +54,7 @@ The following arguments are supported:
 
 * `identity` - (Optional) An `identity` block as defined below.
  
-* `public_network_access_enabled` - (Optional)  Whether public network access is allowed for this server. Defaults to `true`.
+* `public_network_access_enabled` - (Optional) Whether public network access is allowed for this server. Defaults to `true`.
 
 * `storage_authentication_type` - (Optional) Specifies the storage authentication type. Possible value is `ManagedIdentity` or `System`.
 
@@ -78,7 +78,7 @@ A `storage_account` block supports the following:
 
 A `encryption` block supports the following:
 
-* `type` - (Optional) Specifies the type of key used to encrypt the account data. Possible values are `SystemKey` and `CustomerKey`.
+* `type` - (Optional) Specifies the type of key used to encrypt the account data. Possible values are `SystemKey` and `CustomerKey`. Defaults to `SystemKey`.
 
 * `key_vault_key_identifier` - (Optional) Specifies the URI of the Key Vault Key used to encrypt data. The key may either be versioned (for example https://vault/keys/mykey/version1) or reference a key without a version (for example https://vault/keys/mykey).
 
@@ -112,7 +112,7 @@ A `managed_identity` block supports the following:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Media Services Account.
 

@@ -55,6 +55,8 @@ The following arguments are supported:
 
 * `bot_name` - (Required) The name of the Bot Resource this channel will be associated with. Changing this forces a new resource to be created.
 
+* `cognitive_account_id` - (Optional) The ID of the Cognitive Account this Bot Channel should be associated with.
+
 * `cognitive_service_access_key` - (Required) The access key to access the Cognitive Service.
 
 * `cognitive_service_location` - (Required) Specifies the supported Azure location where the Cognitive Service resource exists.
@@ -65,7 +67,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Direct Line Speech Channel.
 

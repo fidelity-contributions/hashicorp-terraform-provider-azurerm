@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package network_test
 
 import (
@@ -40,6 +43,7 @@ func TestAccAzureRMExpressRoutePort_basic(t *testing.T) {
 				check.That(data.ResourceName).Key("link2.0.rack_id").Exists(),
 				check.That(data.ResourceName).Key("link2.0.connector_type").Exists(),
 				check.That(data.ResourceName).Key("ethertype").Exists(),
+				check.That(data.ResourceName).Key("billing_type").Exists(),
 				check.That(data.ResourceName).Key("guid").Exists(),
 				check.That(data.ResourceName).Key("mtu").Exists(),
 			),
@@ -141,6 +145,7 @@ resource "azurerm_express_route_port" "test" {
   peering_location    = "Airtel-Chennai2-CLS"
   bandwidth_in_gbps   = 10
   encapsulation       = "Dot1Q"
+  billing_type        = "MeteredData"
   tags = {
     ENV = "Test"
   }
@@ -276,6 +281,7 @@ resource "azurerm_express_route_port" "test" {
     macsec_cipher                 = "GcmAes256"
     macsec_ckn_keyvault_secret_id = azurerm_key_vault_secret.ckn.id
     macsec_cak_keyvault_secret_id = azurerm_key_vault_secret.cak.id
+    macsec_sci_enabled            = true
   }
   link2 {
     macsec_cipher                 = "GcmAes128"

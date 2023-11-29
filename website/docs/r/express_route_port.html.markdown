@@ -40,13 +40,15 @@ The following arguments are supported:
   
 * `bandwidth_in_gbps` - (Required) Bandwidth of the Express Route Port in Gbps. Changing this forces a new Express Route Port to be created.
 
-* `encapsulation` - (Required)  The encapsulation method used for the Express Route Port. Changing this forces a new Express Route Port to be created. Possible values are: `Dot1Q`, `QinQ`.
+* `encapsulation` - (Required) The encapsulation method used for the Express Route Port. Changing this forces a new Express Route Port to be created. Possible values are: `Dot1Q`, `QinQ`.
 
 * `peering_location` - (Required) The name of the peering location that this Express Route Port is physically mapped to. Changing this forces a new Express Route Port to be created.
 
 * `link1` - (Optional) A list of `link` blocks as defined below.
 
 * `link2` - (Optional) A list of `link` blocks as defined below.
+
+* `billing_type` - (Optional) The billing type of the Express Route Port. Possible values are `MeteredData` and `UnlimitedData`.
 
 ---
 
@@ -73,6 +75,8 @@ A `link` block supports the following:
 * `macsec_ckn_keyvault_secret_id` - (Optional) The ID of the Key Vault Secret that contains the MACSec CKN key for this Express Route Port Link.
 
 * `macsec_cak_keyvault_secret_id` - (Optional) The ID of the Key Vault Secret that contains the Mac security CAK key for this Express Route Port Link.
+
+* `macsec_sci_enabled` - (Optional) Should Secure Channel Identifier on the Express Route Port Link be enabled? Defaults to `false`.
 
 ~> **NOTE** `macsec_ckn_keyvault_secret_id` and `macsec_cak_keyvault_secret_id` should be used together with `identity`, so that the Express Route Port instance have the right permission to access the Key Vault.
 

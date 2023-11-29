@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package media
 
 import (
@@ -17,20 +20,14 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
 )
 
-// define constants based on docs https://docs.microsoft.com/en-us/azure/media-services/latest/filters-concept
-const incrementsInASecond = 10000000
-
-const (
-	nanoSecondsInAIncrement = 100
-	milliSecondsInASecond   = 1000
-)
-
 func resourceMediaAssetFilter() *pluginsdk.Resource {
 	return &pluginsdk.Resource{
 		Create: resourceMediaAssetFilterCreateUpdate,
 		Read:   resourceMediaAssetFilterRead,
 		Update: resourceMediaAssetFilterCreateUpdate,
 		Delete: resourceMediaAssetFilterDelete,
+
+		DeprecationMessage: azureMediaRetirementMessage,
 
 		Timeouts: &pluginsdk.ResourceTimeout{
 			Create: pluginsdk.DefaultTimeout(30 * time.Minute),
@@ -199,7 +196,7 @@ func resourceMediaAssetFilterCreateUpdate(d *pluginsdk.ResourceData, meta interf
 		return err
 	}
 
-	id := assetsandassetfilters.NewAssetFilterID(assetId.SubscriptionId, assetId.ResourceGroupName, assetId.AccountName, assetId.AssetName, d.Get("name").(string))
+	id := assetsandassetfilters.NewAssetFilterID(assetId.SubscriptionId, assetId.ResourceGroupName, assetId.MediaServiceName, assetId.AssetName, d.Get("name").(string))
 	if d.IsNewResource() {
 		existing, err := client.AssetFiltersGet(ctx, id)
 		if err != nil {
@@ -259,8 +256,8 @@ func resourceMediaAssetFilterRead(d *pluginsdk.ResourceData, meta interface{}) e
 		return fmt.Errorf("retrieving %s: %+v", *id, err)
 	}
 
-	d.Set("name", id.FilterName)
-	d.Set("asset_id", assetsandassetfilters.NewAssetID(id.SubscriptionId, id.ResourceGroupName, id.AccountName, id.AssetName).ID())
+	d.Set("name", id.AssetFilterName)
+	d.Set("asset_id", assetsandassetfilters.NewAssetID(id.SubscriptionId, id.ResourceGroupName, id.MediaServiceName, id.AssetName).ID())
 
 	if model := resp.Model; model != nil {
 		if props := model.Properties; props != nil {

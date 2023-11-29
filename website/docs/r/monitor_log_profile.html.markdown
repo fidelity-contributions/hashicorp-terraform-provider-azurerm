@@ -12,6 +12,8 @@ Manages a [Log Profile](https://docs.microsoft.com/azure/monitoring-and-diagnost
 
 -> **NOTE:** It's only possible to configure one Log Profile per Subscription. If you are trying to create more than one Log Profile, an error with `StatusCode=409` will occur.
 
+!> **NOTE:** Azure Log Profiles will be retired on 30th September 2026 and will be removed in v4.0 of the AzureRM Provider. More information on the deprecation can be found [in the Azure documentation](https://learn.microsoft.com/azure/azure-monitor/essentials/activity-log?tabs=powershell#legacy-collection-methods).
+
 ## Example Usage
 
 ```hcl
@@ -65,8 +67,7 @@ resource "azurerm_monitor_log_profile" "example" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the Log Profile. Changing this forces a
-    new resource to be created.
+* `name` - (Required) The name of the Log Profile. Changing this forces a new resource to be created.
 
 * `categories` - (Required) List of categories of the logs.
 
@@ -88,7 +89,7 @@ The `retention_policy` block supports:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Log Profile.
 

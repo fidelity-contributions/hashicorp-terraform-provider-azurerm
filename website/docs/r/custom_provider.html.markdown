@@ -56,7 +56,7 @@ A `resource_type` block supports the following:
 
 * `endpoint` - (Required) Specifies the endpoint of the route definition.
 
-* `routing_type` - (Optional) The routing type that is supported for the resource request. Valid values are `Proxy` and `Proxy,Cache`. This value defaults to `ResourceTypeRoutingProxy`.
+* `routing_type` - (Optional) The routing type that is supported for the resource request. Valid values are `Proxy` and `Proxy,Cache`. Defaults to `Proxy`.
 
 ---
 
@@ -74,7 +74,7 @@ A `validation` block supports the following:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the Arguments listed above - the following Attributes are exported:
 
 * `id` - The ID of the Custom Provider.
 

@@ -55,8 +55,8 @@ resource "azurerm_linux_virtual_machine" "example" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "16.04-LTS"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
   }
 
@@ -103,13 +103,13 @@ The following arguments are supported:
 
 * `daily_recurrence_time` - (Required) The time each day when the schedule takes effect. Must match the format HHmm where HH is 00-23 and mm is 00-59 (e.g. 0930, 2300, etc.)
 
-* `notification_settings` - (Required) The notification setting of a schedule. A `notification_settings` as defined below.
+* `notification_settings` - (Required) The notification setting of a schedule. A `notification_settings` block as defined below.
 
 ---
 
 A `notification_settings` block supports the following:
 
-* `enabled` - (Required) Whether to enable pre-shutdown notifications. Possible values are `true` and `false`. Defaults to `false`
+* `enabled` - (Required) Whether to enable pre-shutdown notifications. Possible values are `true` and `false`.
 
 * `email` - (Optional) E-mail address to which the notification will be sent.
 
